@@ -11,6 +11,6 @@ export class PostsController {
   create(
     @Body() request: CreatePostDto
   ) {
-    return await this.postsService.create(request);
+    return this.postsService.create(request);
   }
 }

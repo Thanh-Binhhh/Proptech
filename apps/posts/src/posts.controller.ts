@@ -1,8 +1,8 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { CreatePostDto } from '@app/contracts/posts/create-post.dto';
 import { POSTS_PATTERNS } from '@app/contracts/posts/books.patterns';
+import { CreatePostDto } from '@app/contracts/posts/post.dto';
 
 
 @Controller()

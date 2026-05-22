@@ -13,11 +13,10 @@ export class PostsService {
 
   create = async (request) => {
     try {
-      return this.postService.send(POSTS_PATTERNS.CREATE, createPostDto);
-
+      return await this.postService.send(POSTS_PATTERNS.CREATE, request);
     } catch (error) {
-            handleMicroserviceError(error)
-        }
+      handleMicroserviceError(error)
+    }
   }
 
   /*==========================
