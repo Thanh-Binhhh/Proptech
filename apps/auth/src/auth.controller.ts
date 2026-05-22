@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { AUTH_PATTERNS } from '@app/contracts/auth/auth.patterns';
@@ -22,11 +22,11 @@ export class AuthController {
   @MessagePattern(AUTH_PATTERNS.SETUP_PASSWORD)
   async setupPassword(
     @Payload() payload: {
-      authorization?: string,
-      body: SetupPasswordDto
+      token?: string,
+      request: SetupPasswordDto
     }
   ) {
-    return await this.authService.setupPassword(payload)
+    return await this.authService.setupPassword(payload.token, payload.request)
   }
 
   @MessagePattern(AUTH_PATTERNS.RESEND_EMAIL)
@@ -38,22 +38,15 @@ export class AuthController {
 
   @MessagePattern(AUTH_PATTERNS.LOGIN)
   async logIn(
-    @Payload() payload: {
-      body: LogInDto,
-      res
-    }
+    @Payload() request: LogInDto
   ) {
-    return await this.authService.logIn(payload)
+    return await this.authService.logIn(request)
   }
 
   @MessagePattern(AUTH_PATTERNS.REFRESH_TOKEN)
   async refreshTokens(
-    @Payload() payload: {
-      req,
-      res
-    }
-  ) {
-    return await this.authService.refreshTokens(payload)
+    @Payload() request: string) {
+    return await this.authService.refreshTokens(request)
   }
 
   @MessagePattern(AUTH_PATTERNS.REQUEST_RESET_PASSWORD)
@@ -66,14 +59,14 @@ export class AuthController {
   @MessagePattern(AUTH_PATTERNS.RESET_PASSWORD)
   async resetPassword(
     @Payload() payload: {
-      authorization?: string,
-      body: ResetPasswordDto
+      token?: string,
+      request: ResetPasswordDto
     }
   ) {
-    return await this.authService.resetPassword(payload)
+    return await this.authService.resetPassword(payload.token, payload.request)
   }
 
-  @Get()
+  @MessagePattern(AUTH_PATTERNS.FIND_ACCOUNTS)
   async find() {
     return await this.authService.find()
   }

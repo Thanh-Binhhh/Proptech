@@ -1,6 +1,7 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { AUTH } from '../constant';
+import { HttpException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
+import { AUTH } from '../constant';
 import { AUTH_PATTERNS } from '@app/contracts/auth/auth.patterns';
 
 @Injectable()
@@ -11,50 +12,153 @@ export class AuthService {
     ) { }
 
     register = async (request) => {
-        return this.authService.send(AUTH_PATTERNS.REGISTER, request)
+        try {
+            return this.authService.send(AUTH_PATTERNS.REGISTER, request)
+        } catch (error) {
+            this.handleMicroserviceError(error)
+        }
     }
 
     setup = async (req, request) => {
-        const payload = {
-            authorization: req.headers.authorization,
-            Body: request
+        try {
+            const token = await this.getTokenFromHeaders(req)
+            const response = await firstValueFrom(
+                this.authService.send(AUTH_PATTERNS.SETUP_PASSWORD, { token, request })
+            )
+            console.log(response)
+            return response
+        } catch (error) {
+            this.handleMicroserviceError(error)
         }
-        return this.authService.send(AUTH_PATTERNS.SETUP_PASSWORD, payload)
     }
 
     resend = async (request) => {
-        return this.authService.send(AUTH_PATTERNS.RESEND_EMAIL, request)
+        try {
+            const response = await firstValueFrom(
+                this.authService.send(AUTH_PATTERNS.RESEND_EMAIL, request)
+            )
+            return response
+        } catch (error) {
+            this.handleMicroserviceError(error);
+        }
     }
 
     login = async (request, res) => {
-        const payload = {
-            Body: request,
-            res
+        try {
+            const response = await firstValueFrom(
+                this.authService.send(AUTH_PATTERNS.LOGIN, request)
+            );
+            const { message, tokens, data } = response
+
+            await this.setTokens(tokens, res)
+            return { message, data }
+        } catch (error) {
+            this.handleMicroserviceError(error);
         }
-        return this.authService.send(AUTH_PATTERNS.LOGIN, payload)
+
     }
 
     refresh = async (req, res) => {
-        const payload = {
-            authorization: req.headers.authorization,
-            res
+        try {
+            const refreshToken = await this.getTokenFromCookies(req)
+
+            const response = await firstValueFrom(
+                this.authService.send(AUTH_PATTERNS.REFRESH_TOKEN, refreshToken)
+            );
+
+            const { message, tokens } = response
+            await this.setTokens(tokens, res)
+            return { message }
+        } catch (error) {
+            this.handleMicroserviceError(error);
         }
-        return this.authService.send(AUTH_PATTERNS.REFRESH_TOKEN, payload)
     }
 
     request = async (request) => {
-        return this.authService.send(AUTH_PATTERNS.REQUEST_RESET_PASSWORD, request)
+        try {
+            return this.authService.send(AUTH_PATTERNS.REQUEST_RESET_PASSWORD, request)
+        } catch (error) {
+            this.handleMicroserviceError(error);
+        }
     }
 
     reset = async (req, request) => {
-        const payload = {
-            authorization: req.headers.authorization,
-            Body: request
+        try {
+            const token = await this.getTokenFromHeaders(req)
+            return this.authService.send(AUTH_PATTERNS.RESET_PASSWORD, { token, request })
+        } catch (error) {
+            this.handleMicroserviceError(error);
         }
-        return this.authService.send(AUTH_PATTERNS.RESET_PASSWORD, payload)
     }
 
     find = async () => {
-        return this.authService.send(AUTH_PATTERNS.FIND_ACCOUNTS, null)
+        try {
+            const response = await firstValueFrom(
+                this.authService.send(AUTH_PATTERNS.FIND_ACCOUNTS, {})
+            )
+            return response
+        } catch (error) {
+            this.handleMicroserviceError(error);
+        }
+    }
+
+    /*==========================
+      HELPER FUNCTIONS
+    ============================*/
+    private setTokens = async (tokens, res) => {
+        res.cookie('access_token', tokens.accessToken, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'lax',
+            maxAge: 15 * 60 * 1000, // 15m
+        })
+
+        res.cookie('refresh_token', tokens.refreshToken, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'lax',
+            maxAge: 24 * 60 * 60 * 1000, // 1d
+        })
+    }
+
+    private getTokenFromCookies = async (req) => {
+        try {
+            const token = req.cookies?.refresh_token ?? null;
+
+            if (!token)
+                throw new UnauthorizedException('Thiếu refresh token để xác thực.');
+            return token
+        } catch (error) {
+            if (error instanceof Error && error.name === 'TokenExpiredError')
+                throw new UnauthorizedException('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.');
+            throw new UnauthorizedException('Refresh token không hợp lệ.')
+        }
+    }
+
+    private getTokenFromHeaders = async (req) => {
+        try {
+            const token = req.headers?.authorization?.split(' ')[1];
+
+            if (!token)
+                throw new UnauthorizedException('Thiếu token để xác thực.');
+            return token
+        } catch (error) {
+            if (error instanceof Error && error.name === 'TokenExpiredError')
+                throw new UnauthorizedException('Link đã hết hạn, vui lòng liên hệ với quản trị viên.');
+            throw new UnauthorizedException('Token không hợp lệ.')
+        }
+    }
+
+    private handleMicroserviceError = (error) => {
+        type MicroserviceError = {
+            statusCode?: number;
+            message?: string;
+        };
+
+        const err = error as MicroserviceError;
+
+        const statusCode = err.statusCode ?? 500;
+        const message = err.message ?? 'Đã có lỗi xảy ra!';
+        throw new HttpException(message, statusCode);
     }
 }

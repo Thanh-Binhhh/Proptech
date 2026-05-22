@@ -45,7 +45,7 @@ export class MailService {
             payload,
             {
                 secret: process.env.SECRET_KEY,
-                expiresIn: '10m'
+                expiresIn: '15m'
             })
 
         return token

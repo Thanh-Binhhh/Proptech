@@ -7,6 +7,7 @@ import { SetupPasswordDto } from '@app/contracts/auth/setup-password.dto';
 import { ResetPasswordDto } from '@app/contracts/auth/forgot-password.dto';
 import { ResendDto } from '@app/contracts/auth/resend.dto';
 import { LogInDto } from '@app/contracts/auth/login.dto';
+import type { Request } from 'express';
 
 @UseGuards(Guard)
 @Controller('auth')

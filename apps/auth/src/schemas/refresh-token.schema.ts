@@ -17,6 +17,9 @@ export class RefreshToken {
     accountId!: mongoose.Types.ObjectId
 
     @Prop({ required: true })
+    role?: string
+
+    @Prop({ required: true })
     expiryAt?: Date
 }
 

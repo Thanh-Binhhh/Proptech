@@ -37,9 +37,9 @@ export class AuthDb {
         return await this.accountModel.findOne({ email })
     }
 
-    storeRefreshToken = async (refreshToken, accountId, expiryAt) => {
+    storeRefreshToken = async (refreshToken, accountId, role, expiryAt) => {
         return await this.refreshTokenModel.updateOne(
-            { accountId },
+            { accountId, role },
             { $set: { refreshToken, expiryAt } },
             { upsert: true }
         )

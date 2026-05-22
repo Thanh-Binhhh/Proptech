@@ -5,7 +5,13 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "webpack": true,
-    "tsConfigPath": "apps/api-gateway/tsconfig.app.json"
+    "tsConfigPath": "apps/api-gateway/tsconfig.app.json",
+    "assets": [
+      {
+        "include": "mail/templates/**/*",
+        "outDir": "dist/apps/auth"
+      }
+    ]
   },
   "monorepo": true,
   "root": "apps/api-gateway",

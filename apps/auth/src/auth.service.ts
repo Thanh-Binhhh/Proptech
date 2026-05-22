@@ -1,4 +1,3 @@
-import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { AccountStatus } from './schemas/register.schema';
 import { JwtService } from '@nestjs/jwt';
 import bcrypt from 'node_modules/bcryptjs';
@@ -7,6 +6,8 @@ import { v4 as uuidv4 } from 'uuid'
 import { MailService } from './mail/mail.service';
 import { AuthDb } from './auth-service.db';
 import { RegistrationDto } from '@app/contracts/auth/register.dto';
+import { RpcException } from '@nestjs/microservices';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
@@ -22,7 +23,7 @@ export class AuthService {
     register = async (request: RegistrationDto) => {
         const isExist = await this.findByEmail(request.email)
         if (isExist)
-            throw new ConflictException("Email đã được đăng ký")
+            return this.throwRpcException(409, "Email đã được đăng ký")
 
         const response = await this.authDb.create({ ...request })
         const { _id, name, email, role, status } = response
@@ -43,26 +44,38 @@ export class AuthService {
     /*==========================
      SET PASWORD
    ============================*/
-    setupPassword = async (payload) => {
-        const auth = await this.authenticate(payload.authorization)
-        const response = await this.authDb.findById(auth.sub)
-        if (!response)
-            throw new BadRequestException('Người dùng không tồn tại.')
-        if (response.status === AccountStatus.ACTIVE)
-            throw new BadRequestException('Tài khoản đã được kích hoạt.')
+    setupPassword = async (token, request) => {
+        try {
+            const payload = await this.jwtService.verifyAsync(
+                token, {
+                secret: process.env.SECRET_KEY
+            })
 
-        response.hashedPassword = await this.hashPassword(payload.password)
-        response.status = AccountStatus.ACTIVE
-        await response.save()
+            const response = await this.authDb.findById(payload.sub)
+            if (!response)
+                return this.throwRpcException(404, 'Người dùng không tồn tại.')
+            if (response.status === AccountStatus.ACTIVE)
+                return this.throwRpcException(409, 'Tài khoản đã được kích hoạt.')
 
-        const { _id, name, role } = response
-        return {
-            message: "Thiết lập tài khoản thành công",
-            data: {
-                _id,
-                name,
-                role
+            response.hashedPassword = await this.hashPassword(request.password)
+            response.status = AccountStatus.ACTIVE
+            await response.save()
+
+            const { _id, name, email, role } = response
+            return {
+                message: "Thiết lập tài khoản thành công",
+                data: {
+                    _id,
+                    name,
+                    email,
+                    role
+                }
             }
+        } catch (error) {
+            const err = error as Error
+            if (err.name === 'TokenExpiredError')
+                return this.throwRpcException(401, 'Token đã hết hạn.')
+            return this.throwRpcException(401, 'Token không hợp lệ.')
         }
     }
 
@@ -70,7 +83,7 @@ export class AuthService {
         var response = await this.authDb.findById(request._id)
 
         if (!response)
-            throw new BadRequestException('ID người dùng không chính xác.')
+            return this.throwRpcException(404, 'ID người dùng không chính xác.')
         const { _id, email } = response
         await this.mailService.sendFirstLoginMail(_id, response.name, email)
         return {
@@ -81,7 +94,7 @@ export class AuthService {
     requestResetPassword = async (request) => {
         const response = await this.findByEmail(request.email)
         if (!response)
-            throw new BadRequestException('Tài khoản không tồn tại.')
+            return this.throwRpcException(404, 'Tài khoản không tồn tại.')
 
         const { _id, name, email } = response
         await this.mailService.sendResetPasswordMail(_id, name, email)
@@ -91,70 +104,53 @@ export class AuthService {
         }
     }
 
-    resetPassword = async (payload) => {
-        const auth = await this.authenticate(payload.authorization)
-        const response = await this.authDb.findById(auth.sub)
-        if (!response)
-            throw new BadRequestException('Người dùng không tồn tại.')
-
-        response.hashedPassword = await this.hashPassword(payload.body.password)
-        await response.save()
-
-        return {
-            message: 'Đổi mật khẩu thành công.',
-        }
-    }
-
-    private authenticate = async (req) => {
+    resetPassword = async (token, request) => {
         try {
-            const token = req.headers?.authorization?.split(' ')[1];
-
-            if (!token) {
-                throw new UnauthorizedException('Thiếu token để xác thực.');
-            }
-
             const payload = await this.jwtService.verifyAsync(
                 token, {
                 secret: process.env.SECRET_KEY
             })
-            return payload
+            const response = await this.authDb.findById(payload.sub)
+            if (!response)
+                return this.throwRpcException(404, 'Người dùng không tồn tại.')
+
+            response.hashedPassword = await this.hashPassword(request.password)
+            await response.save()
+
+            return {
+                message: 'Đổi mật khẩu thành công.',
+            }
         } catch (error) {
-            if (error instanceof Error && error.name === 'TokenExpiredError')
-                throw new UnauthorizedException('Link đã hết hạn, vui lòng liên hệ với quản trị viên.');
-            throw new UnauthorizedException('Token không hợp lệ.')
+            const err = error as Error
+            if (err.name === 'TokenExpiredError')
+                return this.throwRpcException(401, 'Token đã hết hạn.')
+            return this.throwRpcException(401, 'Token không hợp lệ.')
         }
-    }
-
-    private hashPassword = async (password) => {
-        return await bcrypt.hash(password, 10)
-    }
-
-    private findByEmail = async (request) => {
-        return await this.authDb.findByEmail(request)
     }
 
     /*==========================
       LOG IN
     ============================*/
-    logIn = async (payload) => {
+    logIn = async (request) => {
         const message = 'Email hoặc mật khẩu không chính xác.'
-        const response = await this.findByEmail(payload.body.email)
+        const response = await this.findByEmail(request.email)
 
         if (!response)
-            throw new UnauthorizedException(message)
+            return this.throwRpcException(401, message)
 
         const { _id, name, email, role, status, hashedPassword } = response
         if (status !== AccountStatus.ACTIVE)
-            throw new UnauthorizedException('Tài khoản chưa được kích hoạt.')
+            return this.throwRpcException(409, 'Tài khoản chưa được kích hoạt.')
 
-        const isValidPassword = await bcrypt.compare(payload.body.password, hashedPassword!)
+        const isValidPassword = await bcrypt.compare(request.password, hashedPassword!)
         if (!isValidPassword)
-            throw new UnauthorizedException(message)
+            return this.throwRpcException(401, message)
 
-        await this.generateTokens(payload.res, _id)
+        const tokens = await this.generateTokens(_id, role)
 
         return {
-            message: "Đăng nhập thành công",
+            message: "Đăng nhập thành công.",
+            tokens,
             data: {
                 _id,
                 name,
@@ -165,45 +161,16 @@ export class AuthService {
         }
     }
 
-    private generateTokens = async (res, _id) => {
-        const payload = { sub: _id }
-        const accessToken = await this.jwtService.signAsync(payload)
+    refreshTokens = async (request) => {
+        const response = await this.authDb.findRefreshToken(request)
+        if (!response || response.refreshToken !== request)
+            return this.throwRpcException(401, 'Token không hợp lệ')
 
-        res.cookie('access_token', accessToken, {
-            httpOnly: true,
-            secure: false,
-            sameSite: 'lax',
-            maxAge: 15 * 60 * 1000, // 15m
-        })
+        const tokens = await this.generateTokens(response.accountId, response.role)
 
-        const refreshToken = uuidv4()
-        await this.authDb.storeRefreshToken(
-            refreshToken,
-            _id,
-            dayjs().add(1, 'day')
-        )
-
-        res.cookie('refresh_token', refreshToken, {
-            httpOnly: true,
-            secure: false,
-            sameSite: 'lax',
-            maxAge: 24 * 60 * 60 * 1000, // 1d
-        })
-    }
-
-    refreshTokens = async (payload) => {
-        const refreshToken = payload.req.cookies?.refresh_token ?? null;
-        if (!refreshToken) {
-            throw new UnauthorizedException('Thiếu token để xác thực.');
-        }
-
-        const response = await this.authDb.findRefreshToken(refreshToken)
-        if (!response || response.refreshToken !== refreshToken)
-            throw new UnauthorizedException('Token không hợp lệ')
-
-        await this.generateTokens(payload.res, response.accountId)
         return {
-            message: 'Cấp mới token thành công'
+            message: 'Cấp mới token thành công',
+            tokens
         }
     }
 
@@ -216,5 +183,37 @@ export class AuthService {
             message: 'Lấy danh sách nhân viên thành công',
             data: response
         }
+    }
+
+    /*==========================
+      HELPER FUNCTIONS
+    ============================*/
+    private generateTokens = async (_id, role) => {
+        const payload = { sub: _id, role }
+        const accessToken = await this.jwtService.signAsync(payload)
+
+        const refreshToken = uuidv4()
+        await this.authDb.storeRefreshToken(
+            refreshToken,
+            _id,
+            role,
+            dayjs().add(1, 'day')
+        )
+        return { accessToken, refreshToken }
+    }
+
+    private hashPassword = async (password) => {
+        return await bcrypt.hash(password, 10)
+    }
+
+    private findByEmail = async (request) => {
+        return await this.authDb.findByEmail(request)
+    }
+
+    private throwRpcException = (statusCode, message): never => {
+        throw new RpcException({
+            statusCode,
+            message
+        })
     }
 }
