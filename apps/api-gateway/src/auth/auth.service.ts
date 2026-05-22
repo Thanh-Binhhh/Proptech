@@ -1,8 +1,9 @@
-import { HttpException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { AUTH } from '../constant';
 import { AUTH_PATTERNS } from '@app/contracts/auth/auth.patterns';
+import { handleMicroserviceError } from '@app/contracts/helper-functions';
 
 @Injectable()
 export class AuthService {
@@ -15,7 +16,7 @@ export class AuthService {
         try {
             return this.authService.send(AUTH_PATTERNS.REGISTER, request)
         } catch (error) {
-            this.handleMicroserviceError(error)
+            handleMicroserviceError(error)
         }
     }
 
@@ -28,7 +29,7 @@ export class AuthService {
             console.log(response)
             return response
         } catch (error) {
-            this.handleMicroserviceError(error)
+            handleMicroserviceError(error)
         }
     }
 
@@ -39,7 +40,7 @@ export class AuthService {
             )
             return response
         } catch (error) {
-            this.handleMicroserviceError(error);
+            handleMicroserviceError(error);
         }
     }
 
@@ -53,7 +54,7 @@ export class AuthService {
             await this.setTokens(tokens, res)
             return { message, data }
         } catch (error) {
-            this.handleMicroserviceError(error);
+            handleMicroserviceError(error);
         }
 
     }
@@ -70,7 +71,7 @@ export class AuthService {
             await this.setTokens(tokens, res)
             return { message }
         } catch (error) {
-            this.handleMicroserviceError(error);
+            handleMicroserviceError(error);
         }
     }
 
@@ -78,7 +79,7 @@ export class AuthService {
         try {
             return this.authService.send(AUTH_PATTERNS.REQUEST_RESET_PASSWORD, request)
         } catch (error) {
-            this.handleMicroserviceError(error);
+            handleMicroserviceError(error);
         }
     }
 
@@ -87,7 +88,7 @@ export class AuthService {
             const token = await this.getTokenFromHeaders(req)
             return this.authService.send(AUTH_PATTERNS.RESET_PASSWORD, { token, request })
         } catch (error) {
-            this.handleMicroserviceError(error);
+            handleMicroserviceError(error);
         }
     }
 
@@ -98,7 +99,7 @@ export class AuthService {
             )
             return response
         } catch (error) {
-            this.handleMicroserviceError(error);
+            handleMicroserviceError(error);
         }
     }
 
@@ -147,18 +148,5 @@ export class AuthService {
                 throw new UnauthorizedException('Link đã hết hạn, vui lòng liên hệ với quản trị viên.');
             throw new UnauthorizedException('Token không hợp lệ.')
         }
-    }
-
-    private handleMicroserviceError = (error) => {
-        type MicroserviceError = {
-            statusCode?: number;
-            message?: string;
-        };
-
-        const err = error as MicroserviceError;
-
-        const statusCode = err.statusCode ?? 500;
-        const message = err.message ?? 'Đã có lỗi xảy ra!';
-        throw new HttpException(message, statusCode);
     }
 }

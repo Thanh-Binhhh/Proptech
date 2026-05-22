@@ -1,15 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { PostsService } from './posts.service';
-import { CreatePostDto } from '@app/contracts/posts/create-post.dto';
-import { POSTS_PATTERNS } from '@app/contracts/posts/books.patterns';
+import { CreatePostDto } from '@app/contracts/posts/post.dto';
 
 
 @Controller('posts')
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(private readonly postsService: PostsService) { }
 
   @Post()
-  create(@Body() createPostDto: CreatePostDto) {
-    return this.postsService.create(createPostDto);
+  create(
+    @Body() request: CreatePostDto
+  ) {
+    return await this.postsService.create(request);
   }
 }

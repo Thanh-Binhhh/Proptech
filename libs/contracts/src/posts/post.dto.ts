@@ -1,16 +1,15 @@
-// import {
-//     IsNotEmpty,
-//     IsObject,
-//     IsString
-// }
-//     from 'class-validator'
+import {
+    IsNotEmpty,
+    IsObject,
+    IsString
+} from 'class-validator'
 
 export class CreatePostDto {
-    // @IsString()
-    // @IsNotEmpty()
+    @IsString()
+    @IsNotEmpty()
     htmlSource!: string
 
-    // @IsObject()
-    // @IsNotEmpty()
+    @IsObject()
+    @IsNotEmpty()
     jsonSource!: Record<string, any>
 }
