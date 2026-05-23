@@ -62,7 +62,7 @@ AHM-Proptech
 
 ## Các endpoints
 
-## URL: http://localhost:3000
+URL: http://localhost:3000
 
 #### 1. Auth Service
 
@@ -110,7 +110,7 @@ Mỗi dịch vụ trong dự án cần được cấu hình môi trường riên
 docker-compose -p ahm-proptech up --build -d
 ```
 
-Truy cập vào `http://localhost:8080/swagger-ui.html` để xem các endpoints.
+Truy cập vào `http://localhost:3000/api` để xem các endpoints.
 
 ### 5. Một số lệnh liên quan
 
