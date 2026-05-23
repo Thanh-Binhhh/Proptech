@@ -1,98 +1,134 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🏦 Proptech
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Proptech là một nền tảng trực tuyến dành cho công ty môi giới bất động sản, xây dựng dựa trên kiến trúc **Microservices** nhằm hỗ trợ đăng tải, quản lý và trình bày các sản phẩm bất động sản một cách chuyên nghiệp và dễ tiếp cận đến khách hàng.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Công nghệ sử dụng
 
-## Description
+- [NestJs](https://nestjs.com/) - Framework Node.js dùng TypeScript để xây dựng API phía máy chủ.
+- [MongoDB Atlas](https://www.mongodb.com/products/platform/atlas-database) - Cơ sở dữ liệu NoSQL trên nền tảng đám mây..
+- [Docker](https://www.docker.com/) - Công cụ đóng gói và chạy dự án trong môi trường độc lập.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Công cụ hỗ trợ phát triển:
 
-## Project setup
+- Docker Desktop
+- [Postman](https://www.postman.com/downloads/) - Kiểm thử API.
+- [MongoDB Compass](https://www.mongodb.com/products/tools/compass) - Trực quan hóa dữ liệu.
 
-```bash
-$ npm install
+---
+
+## Cấu trúc thư mục
+
+```
+AHM-Proptech
+├── apps/
+│   ├── api-gateway/
+│   │   ├── src/
+│   │   │   ├── auth/
+│   │   │   ├── posts/
+│   │   │   ├── contact/
+│   │   │   ├── guards/
+│   │   │   └── main.ts
+│   │   └── .env
+│   ├── auth/
+│   │   ├── src/
+│   │   │   ├── mail/
+│   │   │   ├── schemas
+│   │   │   ├── auth.controller.ts
+│   │   │   ├── auth.service.ts
+│   │   │   ├── auth.db.ts
+│   │   │   ├── auth.module.ts
+│   │   │   └── main.ts
+│   │   └── .env
+│   ├── contact/
+│   │   ├── src/
+│   │   └── .env
+│   ├── posts/
+│   │   ├── src/
+│   │   └── .env
+├── libs/
+│   ├── contracts/
+│   │   ├── src/
+│   │   │   ├── auth/
+│   │   │   ├── posts/
+│   │   │   ├── contact/
+│   │   │   └── helper-functions.ts
+├── docker-compose.yml/
+├── Dockerfile
+└── package.json
+
 ```
 
-## Compile and run the project
+---
+
+## Các endpoints
+
+## URL: http://localhost:3000
+
+#### 1. Auth Service
+
+| HTTP Method | Endpoint                       | Mô tả                                                            |
+| :---------- | :----------------------------- | :--------------------------------------------------------------- |
+| `POST`      | `/auth/register`               | Tạo tài khoản mới được phép truy cập vào hệ thống.               |
+| `POST`      | `/auth/resend`                 | Gửi lại email xác nhận cho tài khoản vừa được tạo.               |
+| `POST`      | `/auth/setup`                  | Thiết lập mật khẩu đăng nhập cho tài khoản mới.                  |
+| `POST`      | `/auth/login`                  | Đăng nhập.                                                       |
+| `POST`      | `/auth/logout`                 | Đăng xuất.                                                       |
+| `GET`       | `/auth/me`                     | Lấy thông tin tài khoản đang đăng nhập.                          |
+| `POST`      | `/auth/refresh`                | Làm mới token để duy trì phiên đăng nhập.                        |
+| `POST`      | `/auth/request-reset-password` | Gửi email yêu cầu đặt lại mật khẩu khi người dùng quên mật khẩu. |
+| `POST`      | `/auth/reset-password`         | Cập nhật mật khẩu mới khi người dùng quên mật khẩu.              |
+| `GET`       | `/auth`                        | Truy xuất danh sách tài khoản trên hệ thống.                     |
+
+#### 2. Contact Service
+
+#### 3. Posts Service
+
+---
+
+## 🚀 Cài đặt và chạy dự án
+
+### 1. Điều kiện
+
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+- [Git](https://git-scm.com/)
+
+### 2. Sao chép kho lưu trữ
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+git clone https://github.com/Thanh-Binhhh/Proptech.git
 ```
 
-## Run tests
+### 3. Cấu hình môi trường
+
+Mỗi dịch vụ trong dự án cần được cấu hình môi trường riêng biệt
+
+### 4. Khởi động dự án
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+# Khởi động lần đầu hoặc muốn cập nhật config/setup lại từ đầu
+docker-compose -p ahm-proptech up --build -d
 ```
 
-## Deployment
+Truy cập vào `http://localhost:8080/swagger-ui.html` để xem các endpoints.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### 5. Một số lệnh liên quan
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Dừng tất cả dịch vụ
+docker-compose -p ahm-proptech stop
+
+# Khởi động dịch vụ ở các lần sau
+docker-compose -p ahm-proptech start
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+```bash
+# Dừng tất cả dịch vụ, và xóa network + container + volumes.
+docker-compose -p ahm-proptech down -v
+```
 
-## Resources
+---
 
-Check out a few resources that may come in handy when working with NestJS:
+## Tác giả
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- **Thanh Bình** - [Github](https://github.com/Thanh-Binhhh) | [Github Student](https://github.com/Thanh-Binhh)
