@@ -62,8 +62,8 @@ AHM-Proptech
 
 ## Các endpoints
 
-URL: http://localhost:3000
-Swagger: http://localhost:3000/api
+- URL: http://localhost:3000
+- Swagger: http://localhost:3000/api
 
 #### 1. Auth Service
 
