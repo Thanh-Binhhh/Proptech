@@ -32,7 +32,7 @@ AHM-Proptech
 │   ├── auth/
 │   │   ├── src/
 │   │   │   ├── mail/
-│   │   │   ├── schemas
+│   │   │   ├── schemas/
 │   │   │   ├── auth.controller.ts
 │   │   │   ├── auth.service.ts
 │   │   │   ├── auth.db.ts
@@ -63,6 +63,7 @@ AHM-Proptech
 ## Các endpoints
 
 URL: http://localhost:3000
+Swagger: http://localhost:3000/api
 
 #### 1. Auth Service
 
