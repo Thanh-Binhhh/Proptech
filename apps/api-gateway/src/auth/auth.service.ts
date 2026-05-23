@@ -26,7 +26,6 @@ export class AuthService {
             const response = await firstValueFrom(
                 this.authService.send(AUTH_PATTERNS.SETUP_PASSWORD, { token, request })
             )
-            console.log(response)
             return response
         } catch (error) {
             handleMicroserviceError(error)

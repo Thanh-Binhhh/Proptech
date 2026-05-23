@@ -2,7 +2,6 @@ import { Prop } from '@nestjs/mongoose'
 import { PostStatus } from 'apps/posts/src/schemas/posts.schema'
 import {
     IsNotEmpty,
-    IsObject,
     IsOptional,
     IsString
 } from 'class-validator'
@@ -10,7 +9,7 @@ import {
 export class CreatePostDto {
     @IsString()
     @IsNotEmpty()
-    name!: string
+    title!: string
 
     @IsString()
     @IsNotEmpty()
@@ -29,7 +28,7 @@ export class CreatePostDto {
     @IsNotEmpty()
     htmlSource!: string
 
-    @IsObject()
+    @IsString()
     @IsNotEmpty()
-    jsonSource!: Record<string, any>
+    jsonSource!: string
 }

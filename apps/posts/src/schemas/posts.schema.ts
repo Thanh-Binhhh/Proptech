@@ -6,8 +6,8 @@ export type PostDocument = HydratedDocument<Post>
 export enum PostStatus {
     DRAFT = 'Bản nháp',
     PENDING_APPROVAL = 'Chờ duyệt',
-    PUBLIC = 'Công khai',
     PRIVATE = 'Riêng tư',
+    PUBLISHED = 'Xuất bản',
 }
 
 export enum Region {
@@ -17,14 +17,27 @@ export enum Region {
 }
 
 @Schema({
-    collection: 'posts'
+    collection: 'posts',
+    timestamps: true
 })
 export class Post {
     @Prop({
         required: true,
         trim: true
     })
-    name!: string
+    title!: string
+
+    @Prop({
+        type: {
+            url: { type: String, required: true },
+            publicId: { type: String, required: true },
+        },
+        required: true,
+    })
+    cover_picture!: {
+        url: string;
+        publicId: string;
+    };
 
     @Prop({
         required: true,
@@ -40,6 +53,7 @@ export class Post {
 
     @Prop({
         required: true,
+        default: Region.NORTH
     })
     region!: string
 
@@ -48,6 +62,9 @@ export class Post {
         default: PostStatus.DRAFT,
     })
     status!: PostStatus;
+
+    @Prop({})
+    publication_date!: Date;
 
     @Prop({
         required: true,

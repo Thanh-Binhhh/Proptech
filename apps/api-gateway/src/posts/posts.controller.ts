@@ -1,4 +1,6 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseInterceptors, UploadedFile, Param, Query } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+// import type { Express } from 'express';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from '@app/contracts/posts/post.dto';
 
@@ -8,9 +10,31 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) { }
 
   @Post()
-  create(
-    @Body() request: CreatePostDto
+  @UseInterceptors(FileInterceptor('cover_picture'))
+  async create(
+    @Body() request: CreatePostDto,
+    @UploadedFile() coverPicture: Express.Multer.File
   ) {
-    return this.postsService.create(request);
+    return await this.postsService.create(request, coverPicture);
+  }
+
+  @Post(':_id')
+  @UseInterceptors(FileInterceptor('cover_picture'))
+  async update(
+    @Param('_id') _id: string,
+    @Body() request: CreatePostDto,
+    @UploadedFile() coverPicture: Express.Multer.File
+  ) {
+    return await this.postsService.update(_id, request, coverPicture);
+  }
+
+  @Get(':_id')
+  async findOne(@Param('_id') _id: string) {
+    return this.postsService.findOne(_id);
+  }
+
+  @Get()
+  async find() {
+    return await this.postsService.find()
   }
 }

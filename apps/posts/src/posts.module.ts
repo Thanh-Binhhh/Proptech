@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
 import { PostsController } from './posts.controller';
 import { PostsService } from './posts.service';
+import { CloudinaryService } from './pictures/cloudinary.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Post, PostSchema } from './schemas/posts.schema';
 import { PostsDb } from './posts.db';
+import { CloudinaryProvider } from './pictures/cloudinary.provider';
 
 @Module({
   imports: [
@@ -30,6 +32,6 @@ import { PostsDb } from './posts.db';
     }),
   ],
   controllers: [PostsController],
-  providers: [PostsService, PostsDb],
+  providers: [PostsService, CloudinaryService, CloudinaryProvider, PostsDb],
 })
 export class PostsModule { }

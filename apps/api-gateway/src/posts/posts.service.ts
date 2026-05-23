@@ -11,9 +11,33 @@ export class PostsService {
     private readonly postService: ClientProxy
   ) { }
 
-  create = async (request) => {
+  create = async (request, coverPicture) => {
     try {
-      return await this.postService.send(POSTS_PATTERNS.CREATE, request);
+      return await this.postService.send(POSTS_PATTERNS.CREATE, { request, coverPicture });
+    } catch (error) {
+      handleMicroserviceError(error)
+    }
+  }
+
+  update = async (_id, request, coverPicture) => {
+    try {
+      return await this.postService.send(POSTS_PATTERNS.UPDATE, { _id, request, coverPicture });
+    } catch (error) {
+      handleMicroserviceError(error)
+    }
+  }
+
+  findOne = async (_id) => {
+    try {
+      return await this.postService.send(POSTS_PATTERNS.FIND_ONE, { _id });
+    } catch (error) {
+      handleMicroserviceError(error)
+    }
+  }
+
+  find = async () => {
+    try {
+      return await this.postService.send(POSTS_PATTERNS.FIND, {});
     } catch (error) {
       handleMicroserviceError(error)
     }

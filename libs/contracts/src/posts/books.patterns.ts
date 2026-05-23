@@ -1,4 +1,6 @@
 export const POSTS_PATTERNS = {
     CREATE: 'create-post',
-    EDIT: 'edit-post'
+    UPDATE: 'update-post',
+    FIND_ONE: 'find-one',
+    FIND: 'find'
 }

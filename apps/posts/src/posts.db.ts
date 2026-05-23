@@ -1,6 +1,6 @@
 import { InjectModel } from "@nestjs/mongoose";
 import { Post } from "./schemas/posts.schema";
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 
 export class PostsDb {
     constructor(
@@ -12,11 +12,22 @@ export class PostsDb {
         return await this.postModel.create(request)
     }
 
-    find = async () => {
-        return await this.postModel.find().lean()
+    update = async (_id, request) => {
+        return await this.postModel.findByIdAndUpdate(
+            _id,
+            { $set: request },
+            { new: true },
+        )
     }
 
-    findById = async (_id) => {
-        return await this.postModel.findById({ _id })
+    findOne = async (_id) => {
+        if (!Types.ObjectId.isValid(_id)) {
+            return null;
+        }
+        return await this.postModel.findById(_id)
+    }
+
+    find = async () => {
+        return await this.postModel.find().lean()
     }
 }

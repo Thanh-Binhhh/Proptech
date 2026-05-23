@@ -5,14 +5,20 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: npm run start:dev api-gateway
+    command: npx nest start api-gateway --watch
     ports:
-      - "3000:3000"
+      - '3000:3000'
     env_file:
       - ./apps/api-gateway/.env
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - CHOKIDAR_INTERVAL=1000
+      - WATCHPACK_POLLING=true
+      - TSC_WATCHFILE=DynamicPriorityPolling
+      - TSC_WATCHDIRECTORY=DynamicPriorityPolling
     volumes:
-      - .:/app
-      - /app/node_modules
+      - .:/apps
+      - /apps/node_modules
     depends_on:
       - auth
       - contact
@@ -23,40 +29,58 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: npm run start:dev auth
+    command: npx nest start auth --watch
     ports:
-      - "4003:4003"
+      - '4003:4003'
     env_file:
       - ./apps/auth/.env
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - CHOKIDAR_INTERVAL=1000
+      - WATCHPACK_POLLING=true
+      - TSC_WATCHFILE=DynamicPriorityPolling
+      - TSC_WATCHDIRECTORY=DynamicPriorityPolling
     volumes:
-      - .:/app
-      - /app/node_modules
+      - .:/apps
+      - /apps/node_modules
     restart: unless-stopped
 
   contact:
     build:
       context: .
       dockerfile: Dockerfile
-    command: npm run start:dev contact
+    command: npx nest start contact --watch
     ports:
-      - "4002:4002"
+      - '4002:4002'
     env_file:
       - ./apps/contact/.env
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - CHOKIDAR_INTERVAL=1000
+      - WATCHPACK_POLLING=true
+      - TSC_WATCHFILE=DynamicPriorityPolling
+      - TSC_WATCHDIRECTORY=DynamicPriorityPolling
     volumes:
-      - .:/app
-      - /app/node_modules
+      - .:/apps
+      - /apps/node_modules
     restart: unless-stopped
 
   posts:
     build:
       context: .
       dockerfile: Dockerfile
-    command: npm run start:dev posts
+    command: npx nest start posts --watch
     ports:
-      - "4001:4001"
+      - '4001:4001'
     env_file:
       - ./apps/posts/.env
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - CHOKIDAR_INTERVAL=1000
+      - WATCHPACK_POLLING=true
+      - TSC_WATCHFILE=DynamicPriorityPolling
+      - TSC_WATCHDIRECTORY=DynamicPriorityPolling
     volumes:
-      - .:/app
-      - /app/node_modules
+      - .:/apps
+      - /apps/node_modules
     restart: unless-stopped
