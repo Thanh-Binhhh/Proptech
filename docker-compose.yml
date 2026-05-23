@@ -1,0 +1,62 @@
+name: ahm-realestate
+
+services:
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: npm run start:dev api-gateway
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./apps/api-gateway/.env
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - auth
+      - contact
+      - posts
+    restart: unless-stopped
+
+  auth:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: npm run start:dev auth
+    ports:
+      - "4003:4003"
+    env_file:
+      - ./apps/auth/.env
+    volumes:
+      - .:/app
+      - /app/node_modules
+    restart: unless-stopped
+
+  contact:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: npm run start:dev contact
+    ports:
+      - "4002:4002"
+    env_file:
+      - ./apps/contact/.env
+    volumes:
+      - .:/app
+      - /app/node_modules
+    restart: unless-stopped
+
+  posts:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: npm run start:dev posts
+    ports:
+      - "4001:4001"
+    env_file:
+      - ./apps/posts/.env
+    volumes:
+      - .:/app
+      - /app/node_modules
+    restart: unless-stopped
