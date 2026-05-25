@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '../guards/auth.guard';
-import { Public } from '../guards/public.decorater';
+import { Public } from '../guards/decorator/public.decorater';
 import { RegistrationDto } from '@app/contracts/auth/register.dto';
 import { SetupPasswordDto } from '@app/contracts/auth/setup-password.dto';
 import { ResetPasswordDto } from '@app/contracts/auth/forgot-password.dto';
@@ -10,13 +10,15 @@ import { LogInDto } from '@app/contracts/auth/login.dto';
 import type { Request } from 'express';
 import { RoleGuard } from '../guards/role.guard';
 import { AUTH_ROLE_PATTERNS } from '@app/contracts/auth/auth.role-patterns';
+import { Roles } from '../guards/decorator/roles.decorator';
 
 @UseGuards(AuthGuard)
 @Controller('auth')
 export class AuthController {
     constructor(private readonly authService: AuthService) { }
 
-    @UseGuards(new RoleGuard([AUTH_ROLE_PATTERNS.MANAGER]))
+    @UseGuards(RoleGuard)
+    @Roles(AUTH_ROLE_PATTERNS.MANAGER)
     @Post('register')
     async register(
         @Body() request: RegistrationDto
@@ -33,7 +35,8 @@ export class AuthController {
         return await this.authService.setup(req, request)
     }
 
-    @UseGuards(new RoleGuard([AUTH_ROLE_PATTERNS.MANAGER]))
+    @UseGuards(RoleGuard)
+    @Roles(AUTH_ROLE_PATTERNS.MANAGER)
     @Post('resend')
     async resend(
         @Body() request: ResendDto

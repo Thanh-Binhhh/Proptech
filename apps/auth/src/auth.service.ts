@@ -84,6 +84,9 @@ export class AuthService {
 
         if (!response)
             return this.throwRpcException(404, 'ID người dùng không chính xác.')
+        if (response.status !== AccountStatus.PENDING_FIRST_LOGIN)
+            return this.throwRpcException(409, 'Tài khoản đã được kích hoạt lần đầu.')
+
         const { _id, email } = response
         await this.mailService.sendFirstLoginMail(_id, response.name, email)
         return {
