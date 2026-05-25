@@ -29,7 +29,7 @@ export class PostsService {
 
   findOne = async (_id) => {
     try {
-      return await this.postService.send(POSTS_PATTERNS.FIND_ONE, { _id });
+      return await this.postService.send(POSTS_PATTERNS.FIND_ONE, _id);
     } catch (error) {
       handleMicroserviceError(error)
     }
