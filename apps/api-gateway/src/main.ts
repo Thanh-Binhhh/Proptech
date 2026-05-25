@@ -11,6 +11,8 @@ async function bootstrap() {
   const configService = app.get(ConfigService)
   const port = configService.get('PORT')
 
+  app.setGlobalPrefix('api');
+
   app.enableCors({
     origin: [
       configService.get('FE_LOCAL_URL'),
