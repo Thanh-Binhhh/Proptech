@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { CloudinaryService, UploadedImageResult } from './pictures/cloudinary.service';
 import { PostsDb } from './posts.db';
-import { RpcException } from '@nestjs/microservices';
 import { PostStatus } from './schemas/posts.schema';
+import { throwRpcException } from '@app/contracts/helper-functions';
 
 @Injectable()
 export class PostsService {
@@ -48,7 +48,7 @@ export class PostsService {
       if (uploadedImage)
         await this.cloudinaryService.delete(uploadedImage.publicId);
 
-      return this.throwRpcException(
+      return throwRpcException(
         500,
         'Tạo mới bài đăng thất bại. Vui lòng thử lại sau.',
       );
@@ -58,7 +58,7 @@ export class PostsService {
   update = async (_id, request, picture) => {
     let oldPost = await this.findOne(_id)
     if (!oldPost)
-      return this.throwRpcException(
+      return throwRpcException(
         404,
         "Không tìm thấy bài đăng tương ứng."
       )
@@ -86,7 +86,7 @@ export class PostsService {
             oldPost.data.cover_picture.publicId,
           );
         } catch (deleteOldImageError) {
-          return this.throwRpcException(
+          return throwRpcException(
             500,
             'Không thể cập nhật ảnh bài đăng.'
           );
@@ -104,7 +104,7 @@ export class PostsService {
       if (uploadedImage)
         await this.cloudinaryService.delete(uploadedImage.publicId);
 
-      return this.throwRpcException(
+      return throwRpcException(
         500,
         'Cập nhật bài đăng thất bại. Vui lòng thử lại sau.',
       );
@@ -117,7 +117,7 @@ export class PostsService {
   findOne = async (_id) => {
     const response = await this.postsDb.findOne(_id)
     if (!response)
-      return this.throwRpcException(404, 'Không tìm thấy bài đăng tương ứng')
+      return throwRpcException(404, 'Không tìm thấy bài đăng tương ứng')
 
     return {
       message: 'Lấy thông tin bài đăng thành công',
@@ -132,7 +132,7 @@ export class PostsService {
     const total = await this.postsDb.count()
     const totalPages = Math.ceil(total / limit)
     if (page > totalPages)
-      return this.throwRpcException(409, "Tham số truy vấn không hợp lệ")
+      return throwRpcException(409, "Tham số truy vấn không hợp lệ")
 
     const response = await this.postsDb.find(skip, limit)
     if (!response)
@@ -152,10 +152,4 @@ export class PostsService {
   /*==========================
      HELPER FUNCTIONS
    ============================*/
-  private throwRpcException = (statusCode, message): never => {
-    throw new RpcException({
-      statusCode,
-      message
-    })
-  }
 }

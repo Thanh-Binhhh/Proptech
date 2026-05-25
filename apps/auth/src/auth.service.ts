@@ -8,6 +8,7 @@ import { AuthDb } from './auth.db';
 import { RegistrationDto } from '@app/contracts/auth/register.dto';
 import { RpcException } from '@nestjs/microservices';
 import { Injectable } from '@nestjs/common';
+import { throwRpcException } from '@app/contracts/helper-functions';
 
 @Injectable()
 export class AuthService {
@@ -23,7 +24,7 @@ export class AuthService {
     register = async (request: RegistrationDto) => {
         const isExist = await this.findByEmail(request.email)
         if (isExist)
-            return this.throwRpcException(409, "Email đã được đăng ký")
+            return throwRpcException(409, "Email đã được đăng ký")
 
         const response = await this.authDb.create({ ...request })
         const { _id, name, email, role, status } = response
@@ -53,9 +54,9 @@ export class AuthService {
 
             const response = await this.authDb.findById(payload.sub)
             if (!response)
-                return this.throwRpcException(404, 'Người dùng không tồn tại.')
+                return throwRpcException(404, 'Người dùng không tồn tại.')
             if (response.status === AccountStatus.ACTIVE)
-                return this.throwRpcException(409, 'Tài khoản đã được kích hoạt.')
+                return throwRpcException(409, 'Tài khoản đã được kích hoạt.')
 
             response.hashedPassword = await this.hashPassword(request.password)
             response.status = AccountStatus.ACTIVE
@@ -74,8 +75,8 @@ export class AuthService {
         } catch (error) {
             const err = error as Error
             if (err.name === 'TokenExpiredError')
-                return this.throwRpcException(401, 'Token đã hết hạn.')
-            return this.throwRpcException(401, 'Token không hợp lệ.')
+                return throwRpcException(401, 'Token đã hết hạn.')
+            return throwRpcException(401, 'Token không hợp lệ.')
         }
     }
 
@@ -83,9 +84,9 @@ export class AuthService {
         var response = await this.authDb.findById(request._id)
 
         if (!response)
-            return this.throwRpcException(404, 'ID người dùng không chính xác.')
+            return throwRpcException(404, 'ID người dùng không chính xác.')
         if (response.status !== AccountStatus.PENDING_FIRST_LOGIN)
-            return this.throwRpcException(409, 'Tài khoản đã được kích hoạt lần đầu.')
+            return throwRpcException(409, 'Tài khoản đã được kích hoạt lần đầu.')
 
         const { _id, email } = response
         await this.mailService.sendFirstLoginMail(_id, response.name, email)
@@ -97,7 +98,7 @@ export class AuthService {
     requestResetPassword = async (request) => {
         const response = await this.findByEmail(request.email)
         if (!response)
-            return this.throwRpcException(404, 'Tài khoản không tồn tại.')
+            return throwRpcException(404, 'Tài khoản không tồn tại.')
 
         const { _id, name, email } = response
         await this.mailService.sendResetPasswordMail(_id, name, email)
@@ -115,7 +116,7 @@ export class AuthService {
             })
             const response = await this.authDb.findById(payload.sub)
             if (!response)
-                return this.throwRpcException(404, 'Người dùng không tồn tại.')
+                return throwRpcException(404, 'Người dùng không tồn tại.')
 
             response.hashedPassword = await this.hashPassword(request.password)
             await response.save()
@@ -126,8 +127,8 @@ export class AuthService {
         } catch (error) {
             const err = error as Error
             if (err.name === 'TokenExpiredError')
-                return this.throwRpcException(401, 'Token đã hết hạn.')
-            return this.throwRpcException(401, 'Token không hợp lệ.')
+                return throwRpcException(401, 'Token đã hết hạn.')
+            return throwRpcException(401, 'Token không hợp lệ.')
         }
     }
 
@@ -139,15 +140,15 @@ export class AuthService {
         const response = await this.findByEmail(request.email)
 
         if (!response)
-            return this.throwRpcException(401, message)
+            return throwRpcException(401, message)
 
         const { _id, name, email, role, status, hashedPassword } = response
         if (status !== AccountStatus.ACTIVE)
-            return this.throwRpcException(409, 'Tài khoản chưa được kích hoạt.')
+            return throwRpcException(409, 'Tài khoản chưa được kích hoạt.')
 
         const isValidPassword = await bcrypt.compare(request.password, hashedPassword!)
         if (!isValidPassword)
-            return this.throwRpcException(401, message)
+            return throwRpcException(401, message)
 
         const tokens = await this.generateTokens(_id, role)
 
@@ -167,7 +168,7 @@ export class AuthService {
     refreshTokens = async (request) => {
         const response = await this.authDb.findRefreshToken(request)
         if (!response || response.refreshToken !== request)
-            return this.throwRpcException(401, 'Token không hợp lệ')
+            return throwRpcException(401, 'Token không hợp lệ')
 
         const tokens = await this.generateTokens(response.accountId, response.role)
 
@@ -185,7 +186,7 @@ export class AuthService {
 
         const response = await this.authDb.findById(payload.sub)
         if (!response)
-            return this.throwRpcException(404, 'ID người dùng không chính xác.')
+            return throwRpcException(404, 'ID người dùng không chính xác.')
 
         const { _id, name, email, role, status } = response
         return {
@@ -235,12 +236,5 @@ export class AuthService {
 
     private findByEmail = async (request) => {
         return await this.authDb.findByEmail(request)
-    }
-
-    private throwRpcException = (statusCode, message): never => {
-        throw new RpcException({
-            statusCode,
-            message
-        })
     }
 }

@@ -1,4 +1,12 @@
 import { HttpException } from "@nestjs/common";
+import { RpcException } from "@nestjs/microservices";
+
+const throwRpcException = (statusCode, message): never => {
+    throw new RpcException({
+        statusCode,
+        message
+    })
+}
 
 const handleMicroserviceError = (error) => {
     type MicroserviceError = {
@@ -14,5 +22,6 @@ const handleMicroserviceError = (error) => {
 }
 
 export {
+    throwRpcException,
     handleMicroserviceError
 }
