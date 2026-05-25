@@ -74,6 +74,18 @@ export class AuthService {
         }
     }
 
+    getMe = async (req) => {
+        try {
+            const accessToken = await this.getTokenFromCookies(req, 'access')
+            const response = await firstValueFrom(
+                this.authService.send(AUTH_PATTERNS.ME, { accessToken })
+            )
+            return response
+        } catch (error) {
+            handleMicroserviceError(error)
+        }
+    }
+
     request = async (request) => {
         try {
             return this.authService.send(AUTH_PATTERNS.REQUEST_RESET_PASSWORD, request)
@@ -121,9 +133,12 @@ export class AuthService {
         })
     }
 
-    private getTokenFromCookies = async (req) => {
+    private getTokenFromCookies = async (req, type = 'refresh') => {
         try {
-            const token = req.cookies?.refresh_token ?? null;
+            const token =
+                type === 'access'
+                    ? req.cookies?.access_token ?? null
+                    : req.cookies?.refresh_token ?? null;
 
             if (!token)
                 throw new UnauthorizedException('Thiếu refresh token để xác thực.');

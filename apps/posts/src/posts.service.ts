@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CloudinaryService, UploadedImageResult } from './pictures/cloudinary.service';
 import { PostsDb } from './posts.db';
 import { RpcException } from '@nestjs/microservices';
+import { PostStatus } from './schemas/posts.schema';
 
 @Injectable()
 export class PostsService {
@@ -15,6 +16,7 @@ export class PostsService {
   ============================*/
   create = async (request, picture) => {
     let uploadedImage: UploadedImageResult | null = null;
+    let message = 'Tạo mới bài đăng thành công.'
 
     try {
       uploadedImage = await this.cloudinaryService.upload(picture)
@@ -28,8 +30,11 @@ export class PostsService {
         cover_picture,
       })
 
+      if (response.status === PostStatus.PUBLISHED)
+        message = 'Tạo mới bài đăng thành công. Cần chờ quản lý duyệt trước khi xuất bản'
+
       return {
-        message: 'Tạo mới bài đăng thành công. Cần chờ quản lý duyệt trước khi xuất bản',
+        message,
         data: response
       };
     } catch (error) {

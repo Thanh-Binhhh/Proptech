@@ -49,6 +49,14 @@ export class AuthController {
     return await this.authService.refreshTokens(request)
   }
 
+  @MessagePattern(AUTH_PATTERNS.ME)
+  async getMe(
+    @Payload() payload: {
+      accessToken?: string
+    }) {
+    return await this.authService.getMe(payload.accessToken)
+  }
+
   @MessagePattern(AUTH_PATTERNS.REQUEST_RESET_PASSWORD)
   async requestResetPassword(
     @Payload() request: ResetPasswordDto

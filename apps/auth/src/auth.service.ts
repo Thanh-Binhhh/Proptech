@@ -174,6 +174,30 @@ export class AuthService {
         }
     }
 
+    getMe = async (token) => {
+        const payload = await this.jwtService.verifyAsync(
+            token, {
+            secret: process.env.SECRET_KEY
+        })
+
+        const response = await this.authDb.findById(payload.sub)
+        if (!response)
+            return this.throwRpcException(404, 'ID người dùng không chính xác.')
+
+        const { _id, name, email, role, status } = response
+        return {
+            message: 'Truy vấn thông tin tài khoản thành công',
+            data: {
+                _id,
+                name,
+                email,
+                role,
+                status
+            }
+        }
+
+    }
+
     /*==========================
       QUERY ACCOUNTS
     ============================*/

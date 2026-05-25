@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Guard } from '../guards/auth.guard';
 import { Public } from '../guards/public.decorater';
@@ -52,6 +52,11 @@ export class AuthController {
         @Res({ passthrough: true }) res: Response
     ) {
         return await this.authService.refresh(req, res)
+    }
+
+    @Get('me')
+    async getMe(@Req() req: any) {
+        return await this.authService.getMe(req)
     }
 
     @Public()
