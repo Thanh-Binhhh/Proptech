@@ -17,12 +17,20 @@ export class PostsService {
   create = async (request, picture) => {
     let uploadedImage: UploadedImageResult | null = null;
     let message = 'Tạo mới bài đăng thành công.'
+    console.log(request)
 
     try {
+      // Upload cover picture to Cloudinary
       uploadedImage = await this.cloudinaryService.upload(picture)
       const cover_picture = {
         url: uploadedImage.url,
         publicId: uploadedImage.publicId,
+      }
+
+      // Posts cannot be published before manager approval.
+      if (request.status === PostStatus.PUBLISHED) {
+        request.status = PostStatus.PENDING_APPROVAL
+        message = 'Tạo mới bài đăng thành công. Cần chờ quản lý duyệt trước khi xuất bản'
       }
 
       const response = await this.postsDb.create({
@@ -30,14 +38,13 @@ export class PostsService {
         cover_picture,
       })
 
-      if (response.status === PostStatus.PUBLISHED)
-        message = 'Tạo mới bài đăng thành công. Cần chờ quản lý duyệt trước khi xuất bản'
-
       return {
         message,
         data: response
       };
     } catch (error) {
+      // Delete the cover picture if post creation fails 
+      // after a successful Cloudinary upload.s
       if (uploadedImage)
         await this.cloudinaryService.delete(uploadedImage.publicId);
 
@@ -86,6 +93,9 @@ export class PostsService {
         }
       }
 
+      // if (response.status === PostStatus.PUBLISHED)
+      //   message = 'Tạo mới bài đăng thành công. Cần chờ quản lý duyệt trước khi xuất bản'
+
       return {
         message: 'Cập nhật bài đăng thành công. Cần chờ quản lý duyệt trước tái xuất bản',
         data: response
@@ -115,13 +125,26 @@ export class PostsService {
     }
   }
 
-  find = async () => {
-    const response = await this.postsDb.find()
+  find = async (page) => {
+    const limit = 12
+    const skip = (page - 1) * limit
+
+    const total = await this.postsDb.count()
+    const totalPages = Math.ceil(total / limit)
+    if (page > totalPages)
+      return this.throwRpcException(409, "Tham số truy vấn không hợp lệ")
+
+    const response = await this.postsDb.find(skip, limit)
     if (!response)
       return { message: 'Chưa có bài đăng nào' }
 
     return {
       message: 'Lấy danh sách bài đăng thành công',
+      pagination: {
+        page,
+        limit,
+        totalPages,
+      },
       data: response
     }
   }

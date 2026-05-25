@@ -35,9 +35,9 @@ export class PostsService {
     }
   }
 
-  find = async () => {
+  find = async (page) => {
     try {
-      return await this.postService.send(POSTS_PATTERNS.FIND, {});
+      return await this.postService.send(POSTS_PATTERNS.FIND, page);
     } catch (error) {
       handleMicroserviceError(error)
     }

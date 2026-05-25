@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseInterceptors, UploadedFile, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseInterceptors, UploadedFile, Param, Query, DefaultValuePipe, ParseIntPipe } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 // import type { Express } from 'express';
 import { PostsService } from './posts.service';
@@ -34,7 +34,9 @@ export class PostsController {
   }
 
   @Get()
-  async find() {
-    return await this.postsService.find()
+  async find(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+  ) {
+    return await this.postsService.find(page)
   }
 }

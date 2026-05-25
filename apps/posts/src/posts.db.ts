@@ -27,7 +27,17 @@ export class PostsDb {
         return await this.postModel.findById(_id)
     }
 
-    find = async () => {
-        return await this.postModel.find().lean()
+    find = async (skip, limit) => {
+        return await this.postModel
+            .find()
+            .select('-htmlSource -jsonSource -createdAt -updatedAt')
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 })
+            .lean()
+    }
+
+    count = async () => {
+        return await this.postModel.countDocuments()
     }
 }

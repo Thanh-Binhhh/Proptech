@@ -31,7 +31,7 @@ export class PostsController {
   }
 
   @MessagePattern(POSTS_PATTERNS.FIND)
-  async find() {
-    return await this.postsService.find()
+  async find(@Payload() request: number) {
+    return await this.postsService.find(request)
   }
 }
