@@ -19,6 +19,10 @@ export class CreatePostDto {
     @IsNotEmpty()
     location!: string
 
+    @IsString()
+    @IsNotEmpty()
+    region!: string
+
     @Prop({ default: PostStatus.DRAFT })
     @IsString()
     @IsOptional()

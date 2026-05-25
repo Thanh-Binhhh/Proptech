@@ -17,7 +17,6 @@ export class PostsService {
   create = async (request, picture) => {
     let uploadedImage: UploadedImageResult | null = null;
     let message = 'Tạo mới bài đăng thành công.'
-    console.log(request)
 
     try {
       // Upload cover picture to Cloudinary
@@ -56,6 +55,7 @@ export class PostsService {
   }
 
   update = async (_id, request, picture) => {
+    let message = 'Cập nhật bài đăng thành công.'
     let oldPost = await this.findOne(_id)
     if (!oldPost)
       return throwRpcException(
@@ -71,6 +71,12 @@ export class PostsService {
         url: uploadedImage.url,
         publicId: uploadedImage.publicId,
       }
+
+      if (request.status === PostStatus.PUBLISHED &&
+        oldPost.data.status !== PostStatus.PUBLISHED) {
+        message = 'Cập nhật bài đăng thành công. Cần chờ quản lý duyệt trước khi xuất bản'
+      }
+
 
       const response = await this.postsDb.update(
         _id,
@@ -93,11 +99,8 @@ export class PostsService {
         }
       }
 
-      // if (response.status === PostStatus.PUBLISHED)
-      //   message = 'Tạo mới bài đăng thành công. Cần chờ quản lý duyệt trước khi xuất bản'
-
       return {
-        message: 'Cập nhật bài đăng thành công. Cần chờ quản lý duyệt trước tái xuất bản',
+        message,
         data: response
       };
     } catch (error) {
