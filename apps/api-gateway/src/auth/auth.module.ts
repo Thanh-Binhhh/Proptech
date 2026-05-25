@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AUTH } from '../constant';
-import { Guard } from '../guards/auth.guard';
+import { AuthGuard } from '../guards/auth.guard';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { SignOptions } from 'jsonwebtoken';
@@ -68,7 +68,7 @@ import { SignOptions } from 'jsonwebtoken';
   ],
   providers: [
     AuthService,
-    Guard,
+    AuthGuard,
   ],
   controllers: [AuthController],
 })

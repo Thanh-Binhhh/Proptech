@@ -5,7 +5,7 @@ import { PUBLIC_KEY } from "./public.decorater";
 import { JwtService } from "@nestjs/jwt";
 
 @Injectable()
-export class Guard implements CanActivate {
+export class AuthGuard implements CanActivate {
     constructor(
         private readonly jwtService: JwtService,
         private readonly reflector: Reflector
@@ -28,7 +28,7 @@ export class Guard implements CanActivate {
 
         try {
             const payload = await this.jwtService.verifyAsync(token)
-            request['accountId'] = payload.sub;
+            request['user'] = payload;
         } catch (error) {
             throw new UnauthorizedException(message)
         }
