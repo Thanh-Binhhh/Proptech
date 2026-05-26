@@ -6,7 +6,6 @@ import { v4 as uuidv4 } from 'uuid'
 import { MailService } from './mail/mail.service';
 import { AuthDb } from './auth.db';
 import { RegistrationDto } from '@app/contracts/auth/register.dto';
-import { RpcException } from '@nestjs/microservices';
 import { Injectable } from '@nestjs/common';
 import { throwRpcException } from '@app/contracts/helper-functions';
 

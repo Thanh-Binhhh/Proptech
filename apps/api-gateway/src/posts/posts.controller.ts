@@ -1,6 +1,5 @@
 import { Controller, Get, Post, Body, UseInterceptors, UploadedFile, Param, Query, DefaultValuePipe, ParseIntPipe } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-// import type { Express } from 'express';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from '@app/contracts/posts/post.dto';
 

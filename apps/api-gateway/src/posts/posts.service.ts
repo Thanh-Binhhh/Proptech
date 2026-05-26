@@ -42,8 +42,4 @@ export class PostsService {
       handleMicroserviceError(error)
     }
   }
-
-  /*==========================
-      HELPER FUNCTIONS
-    ============================*/
 }

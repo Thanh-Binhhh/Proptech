@@ -12,31 +12,6 @@ import { SignOptions } from 'jsonwebtoken';
   imports: [
     ConfigModule,
 
-    // ClientsModule.register([
-    //   {
-    //     name: AUTH,
-    //     transport: Transport.TCP,
-    //     options: {
-    //       // host: 'localhost',
-    //       // port: 4003,
-    //     },
-    //   },
-    // ]),
-
-    // JwtModule.registerAsync({
-    //   imports: [ConfigModule],
-    //   global: true,
-    //   inject: [ConfigService],
-    //   useFactory: async (configService: ConfigService) => ({
-    //     secret: configService.get<string>('SECRET_KEY'),
-    //     signOptions: {
-    //       expiresIn: (
-    //         configService.get<string>('JWT_ACCESS_TOKEN_EXPIRED') || '15m'
-    //       ) as SignOptions['expiresIn'],
-    //     },
-    //   }),
-    // }),
-
     ClientsModule.registerAsync([
       {
         name: AUTH,
@@ -66,6 +41,7 @@ import { SignOptions } from 'jsonwebtoken';
       }),
     }),
   ],
+
   providers: [
     AuthService,
     AuthGuard,

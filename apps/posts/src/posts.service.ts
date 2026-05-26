@@ -156,8 +156,4 @@ export class PostsService {
       data: response
     }
   }
-
-  /*==========================
-     HELPER FUNCTIONS
-   ============================*/
 }
