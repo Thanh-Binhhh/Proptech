@@ -3,7 +3,7 @@ import {
     IsString
 } from 'class-validator'
 
-export class CreatePostDto {
+export class CreateContactDto {
     @IsString()
     @IsNotEmpty()
     name!: string

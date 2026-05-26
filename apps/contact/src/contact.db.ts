@@ -1,7 +1,9 @@
 import { InjectModel } from "@nestjs/mongoose";
-import { Message, MessageStatus } from "../schemas/contact.schema";
+import { Message } from "../schemas/contact.schema";
 import { Model, Types } from "mongoose";
+import { Injectable } from "@nestjs/common";
 
+@Injectable()
 export class ContactDb {
     constructor(
         @InjectModel(Message.name)
@@ -16,7 +18,10 @@ export class ContactDb {
         return await this.messageModel.findByIdAndUpdate(
             _id,
             { status },
-            { new: true }
+            {
+                new: true,
+                runValidators: true,
+            },
         );
     };
 
@@ -30,6 +35,7 @@ export class ContactDb {
     find = async () => {
         return await this.messageModel
             .find()
+            .sort({ createdAt: -1 })
             .lean()
     }
 }

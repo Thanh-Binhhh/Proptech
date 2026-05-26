@@ -1,27 +1,29 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
 import { ContactService } from './contact.service';
+import { CreateContactDto } from '@app/contracts/contact/create-contact.dto';
+import { UpdateStatusDto } from '@app/contracts/contact/update-status.dto';
 
 @Controller('contact')
 export class ContactController {
-    constructor(private readonly contactService: ContactService) { }
+  constructor(private readonly contactService: ContactService) { }
 
-      @Post()
-      create(@Body() request: CreateContactDto) {
-        return this.contactService.create(request);
-      }
+  @Post()
+  async create(@Body() request: CreateContactDto) {
+    return await this.contactService.create(request);
+  }
 
-    //   @Get()
-    //   findAll() {
-    //     return this.contactService.find();
-    //   }
+  @Patch(':_id')
+  async update(@Param('_id') _id: string, @Body() request: UpdateStatusDto) {
+    return await this.contactService.update(_id, request);
+  }
 
-    //   @Get(':id')
-    //   findOne(@Param('id') id: string) {
-    //     return this.contactService.findOne(id);
-    //   }
+  @Get(':_id')
+  async findOne(@Param('_id') _id: string) {
+    return await this.contactService.findOne(_id);
+  }
 
-    //   @Patch(':id')
-    //   update(@Param('id') id: string, @Body() request: UpdateContactDto) {
-    //     return this.contactService.update(+id, request);
-    //   }
+  @Get()
+  async findAll() {
+    return await this.contactService.find();
+  }
 }

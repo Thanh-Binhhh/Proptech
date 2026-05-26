@@ -1,24 +1,45 @@
-import { Injectable } from '@nestjs/common';
+import { handleMicroserviceError } from '@app/contracts/helper-functions';
+import { Inject, Injectable } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { CONTACT } from '../constant';
+import { CONTACTS_PATTERNS } from '@app/contracts/contact/contacts.pattern';
 
 @Injectable()
 export class ContactService {
-    //   create(createContactDto: CreateContactDto) {
-    //     return 'This action adds a new contact';
-    //   }
+    constructor(
+        @Inject(CONTACT)
+        private readonly contactService: ClientProxy
+    ) { }
 
-    //   findAll() {
-    //     return `This action returns all contact`;
-    //   }
+    create = async (request) => {
+        try {
+            return await this.contactService.send(CONTACTS_PATTERNS.CREATE, request)
+        } catch (error) {
+            handleMicroserviceError(error)
+        }
+    }
 
-    //   findOne(id: number) {
-    //     return `This action returns a #${id} contact`;
-    //   }
+    update = async (_id, request) => {
+        try {
+            return await this.contactService.send(CONTACTS_PATTERNS.UPDATE, { _id, request })
+        } catch (error) {
+            handleMicroserviceError(error)
+        }
+    }
 
-    //   update(id: number, updateContactDto: UpdateContactDto) {
-    //     return `This action updates a #${id} contact`;
-    //   }
+    findOne = async (_id) => {
+        try {
+            return await this.contactService.send(CONTACTS_PATTERNS.FIND_ONE, _id);
+        } catch (error) {
+            handleMicroserviceError(error)
+        }
+    }
 
-    //   remove(id: number) {
-    //     return `This action removes a #${id} contact`;
-    //   }
+    find = async () => {
+        try {
+            return await this.contactService.send(CONTACTS_PATTERNS.FIND, {});
+        } catch (error) {
+            handleMicroserviceError(error)
+        }
+    }
 }

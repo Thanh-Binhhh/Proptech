@@ -4,7 +4,7 @@ import {
     IsNotEmpty,
 } from 'class-validator'
 
-export class CreatePostDto {
+export class UpdateStatusDto {
     @IsEnum(MessageStatus, { message: "Trạng thái của yêu cầu liên hệ không hợp lệ" })
     @IsNotEmpty()
     status!: string
