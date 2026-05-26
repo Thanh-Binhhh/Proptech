@@ -84,14 +84,3 @@ services:
       - .:/apps
       - /apps/node_modules
     restart: unless-stopped
-
-  ollama:
-    image: ollama/ollama:latest
-    ports:
-      - '11434:11434'
-    volumes:
-      - ollama:/root/.ollama
-    restart: unless-stopped
-
-volumes:
-  ollama:
