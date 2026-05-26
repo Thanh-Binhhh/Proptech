@@ -66,6 +66,8 @@ export class AuthController {
         return await this.authService.getMe(req)
     }
 
+    // TODO: Đăng xuất
+
     @Public()
     @Post('request-reset-password')
     async requestResetPassword(

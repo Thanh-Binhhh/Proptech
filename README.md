@@ -63,7 +63,7 @@ AHM-Proptech
 ## Các endpoints
 
 - URL: http://localhost:3000/api
-- Swagger: http://localhost:3000/api
+- Swagger: http://localhost:3000/api/docs
 
 #### 1. Auth Service
 
@@ -73,9 +73,9 @@ AHM-Proptech
 | `POST`      | `/auth/resend`                 | Gửi lại email xác nhận cho tài khoản vừa được tạo.               |
 | `POST`      | `/auth/setup`                  | Thiết lập mật khẩu đăng nhập cho tài khoản mới.                  |
 | `POST`      | `/auth/login`                  | Đăng nhập.                                                       |
-| `POST`      | `/auth/logout`                 | Đăng xuất.                                                       |
 | `GET`       | `/auth/me`                     | Lấy thông tin tài khoản đang đăng nhập.                          |
 | `POST`      | `/auth/refresh`                | Làm mới token để duy trì phiên đăng nhập.                        |
+| `POST`      | `/auth/logout`                 | Đăng xuất.                                                       |
 | `POST`      | `/auth/request-reset-password` | Gửi email yêu cầu đặt lại mật khẩu khi người dùng quên mật khẩu. |
 | `POST`      | `/auth/reset-password`         | Cập nhật mật khẩu mới khi người dùng quên mật khẩu.              |
 | `GET`       | `/auth`                        | Truy xuất danh sách tài khoản trên hệ thống.                     |
@@ -83,6 +83,13 @@ AHM-Proptech
 #### 2. Contact Service
 
 #### 3. Posts Service
+
+| HTTP Method | Endpoint     | Mô tả                       |
+| :---------- | :----------- | :-------------------------- |
+| `POST`      | `/posts`     | Tạo một bài đăng mới.       |
+| `POST`      | `/posts/:id` | Cập nhật bài đăng.          |
+| `GET`       | `/posts`     | Lấy danh sách các bài đăng. |
+| `GET`       | `/posts/:id` | Lấy chi tiết một bài đăng.  |
 
 ---
 
