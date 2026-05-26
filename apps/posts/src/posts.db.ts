@@ -30,7 +30,7 @@ export class PostsDb {
     find = async (skip, limit) => {
         return await this.postModel
             .find()
-            .select('-htmlSource -jsonSource -createdAt -updatedAt')
+            .select('-htmlSource -jsonSource')
             .skip(skip)
             .limit(limit)
             .sort({ createdAt: -1 })
