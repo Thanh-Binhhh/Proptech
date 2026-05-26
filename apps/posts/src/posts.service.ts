@@ -15,6 +15,9 @@ export class PostsService {
     CU POSTS
   ============================*/
   create = async (request, picture) => {
+    if (!picture)
+      return throwRpcException(400, "Ảnh bìa bài đăng chưa được gửi lên.")
+
     let uploadedImage: UploadedImageResult | null = null;
     let message = 'Tạo mới bài đăng thành công.'
 
@@ -55,6 +58,9 @@ export class PostsService {
   }
 
   update = async (_id, request, picture) => {
+    if (!picture)
+      return throwRpcException(400, "Ảnh bìa bài đăng chưa được gửi lên.")
+
     let message = 'Cập nhật bài đăng thành công.'
     let oldPost = await this.findOne(_id)
     if (!oldPost)
