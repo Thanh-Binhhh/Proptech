@@ -1,17 +1,27 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { ContactDb } from './contact.db';
 import { throwRpcException } from '@app/contracts/helper-functions';
+import { POSTS } from 'libs/contracts/constant';
+import { POSTS_PATTERNS } from '@app/contracts/posts/books.patterns';
 
 @Injectable()
 export class ContactService {
   constructor(
-    private readonly contactDb: ContactDb
+    private readonly contactDb: ContactDb,
+
+    @Inject(POSTS)
+    private readonly postService: ClientProxy
   ) { }
 
   /*==========================
       CU CONTACTS
   ============================*/
   create = async (request) => {
+    if (request.propertyId) {
+      // await this.postService.send(POSTS_PATTERNS.FIND_ONE, request.propertyId);
+    }
+
     const response = await this.contactDb.create(request)
 
     return {

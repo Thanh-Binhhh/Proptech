@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { POSTS } from '../constant';
+import { POSTS } from '../../../../libs/contracts/constant';
 import { ClientProxy } from '@nestjs/microservices';
 import { POSTS_PATTERNS } from '@app/contracts/posts/books.patterns';
 import { handleMicroserviceError } from '@app/contracts/helper-functions';

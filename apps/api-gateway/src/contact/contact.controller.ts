@@ -1,12 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '../guards/auth.guard';
+import { Public } from '../guards/decorator/public.decorater';
 import { ContactService } from './contact.service';
 import { CreateContactDto } from '@app/contracts/contact/create-contact.dto';
 import { UpdateStatusDto } from '@app/contracts/contact/update-status.dto';
 
+@UseGuards(AuthGuard)
 @Controller('contact')
 export class ContactController {
   constructor(private readonly contactService: ContactService) { }
 
+  @Public()
   @Post()
   async create(@Body() request: CreateContactDto) {
     return await this.contactService.create(request);

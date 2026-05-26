@@ -1,7 +1,7 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { AUTH } from '../constant';
+import { AUTH } from '../../../../libs/contracts/constant';
 import { AUTH_PATTERNS } from '@app/contracts/auth/auth.patterns';
 import { handleMicroserviceError } from '@app/contracts/helper-functions';
 

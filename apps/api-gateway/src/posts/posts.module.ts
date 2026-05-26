@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { PostsController } from './posts.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { POSTS } from '../constant';
+import { POSTS } from 'libs/contracts/constant';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({

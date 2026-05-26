@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ContactService } from './contact.service';
 import { ContactController } from './contact.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { CONTACT } from '../constant';
+import { CONTACT } from 'libs/contracts/constant';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({

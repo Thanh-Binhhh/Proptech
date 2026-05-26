@@ -1,7 +1,7 @@
 import { handleMicroserviceError } from '@app/contracts/helper-functions';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { CONTACT } from '../constant';
+import { CONTACT } from '../../../../libs/contracts/constant';
 import { CONTACTS_PATTERNS } from '@app/contracts/contact/contacts.pattern';
 
 @Injectable()

@@ -39,6 +39,9 @@ export class Message {
         default: MessageStatus.NEW,
     })
     status!: MessageStatus;
+
+    @Prop({})
+    propertyId!: string
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message)
