@@ -77,7 +77,6 @@ export class PostsService {
         message = 'Cập nhật bài đăng thành công. Cần chờ quản lý duyệt trước khi xuất bản'
       }
 
-
       const response = await this.postsDb.update(
         _id,
         {

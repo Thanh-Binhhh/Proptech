@@ -5,8 +5,5 @@ import { ContactService } from './contact.service';
 export class ContactController {
   constructor(private readonly contactService: ContactService) {}
 
-  @Get()
-  getHello(): string {
-    return this.contactService.getHello();
-  }
+  
 }
