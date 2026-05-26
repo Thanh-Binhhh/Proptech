@@ -5,10 +5,10 @@ import { ContactService } from './contact.service';
 export class ContactController {
     constructor(private readonly contactService: ContactService) { }
 
-    //   @Post()
-    //   create(@Body() request: CreateContactDto) {
-    //     return this.contactService.create(request);
-    //   }
+      @Post()
+      create(@Body() request: CreateContactDto) {
+        return this.contactService.create(request);
+      }
 
     //   @Get()
     //   findAll() {

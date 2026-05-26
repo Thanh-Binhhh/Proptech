@@ -11,7 +11,8 @@ export enum AccountStatus {
 
 export enum AccountRole {
     EMPLOYEE = 'Nhân viên',
-    MANAGER = 'Quản lý'
+    MANAGER = 'Quản lý',
+    INTERN = 'Thực tập sinh'
 }
 
 @Schema({

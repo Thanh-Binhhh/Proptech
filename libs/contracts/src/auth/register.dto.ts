@@ -4,6 +4,7 @@ import {
     IsNotEmpty,
     IsEmail,
     IsOptional,
+    IsEnum,
 } from 'class-validator';
 
 export enum AccountRole {
@@ -20,8 +21,8 @@ export class RegistrationDto {
     @IsNotEmpty()
     email!: string;
 
+    @IsEnum(AccountRole, { message: "Vai trò không hợp lệ." })
     @Prop({ default: AccountRole.EMPLOYEE })
     @IsOptional()
-    @IsString()
     role!: string;
 }
