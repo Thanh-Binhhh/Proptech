@@ -82,6 +82,13 @@ AHM-Proptech
 
 #### 2. Contact Service
 
+| HTTP Method | Endpoint     | Mô tả                               |
+| :---------- | :----------- | :---------------------------------- |
+| `POST`      | `/posts`     | Tạo một yêu cầu tư vấn mới.         |
+| `PATCH`     | `/posts/:id` | Cập nhật trạng thái yêu cầu tư vấn. |
+| `GET`       | `/posts`     | Lấy danh sách các yêu cầu tư vấn.   |
+| `GET`       | `/posts/:id` | Lấy chi tiết một yêu cầu tư vấn.    |
+
 #### 3. Posts Service
 
 | HTTP Method | Endpoint     | Mô tả                       |
@@ -109,30 +116,30 @@ git clone https://github.com/Thanh-Binhhh/Proptech.git
 
 ### 3. Cấu hình môi trường
 
-Mỗi dịch vụ trong dự án cần được cấu hình môi trường riêng biệt
+Mỗi dịch vụ trong dự án cần có file cấu hình môi trường riêng biệt
 
 ### 4. Khởi động dự án
 
 ```bash
 # Khởi động lần đầu hoặc muốn cập nhật config/setup lại từ đầu
-docker-compose -p ahm-proptech up --build -d
+docker compose up --build -d
 ```
 
-Truy cập vào `http://localhost:3000/api` để xem các endpoints.
+Truy cập vào `http://localhost:3000/api/docs` để xem các endpoints.
 
 ### 5. Một số lệnh liên quan
 
 ```bash
 # Dừng tất cả dịch vụ
-docker-compose -p ahm-proptech stop
+docker-compose stop
 
 # Khởi động dịch vụ ở các lần sau
-docker-compose -p ahm-proptech start
+docker-compose start
 ```
 
 ```bash
 # Dừng tất cả dịch vụ, và xóa network + container + volumes.
-docker-compose -p ahm-proptech down -v
+docker-compose down -v
 ```
 
 ---
