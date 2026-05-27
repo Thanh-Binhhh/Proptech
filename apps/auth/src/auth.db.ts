@@ -30,7 +30,7 @@ export class AuthDb {
     }
 
     findById = async (_id) => {
-        return await this.accountModel.findOne({ _id })
+        return await this.accountModel.findById(_id)
     }
 
     findByEmail = async (email) => {

@@ -14,10 +14,10 @@ export class ContactDb {
         return await this.messageModel.create(request)
     }
 
-    update = async (_id: string, status) => {
+    update = async (_id: string, status, employeeId) => {
         return await this.messageModel.findByIdAndUpdate(
             _id,
-            { status },
+            { status, employeeId },
             {
                 new: true,
                 runValidators: true,
@@ -32,11 +32,23 @@ export class ContactDb {
         return await this.messageModel.findById(_id)
     }
 
-    find = async () => {
+    findByEmployee = async (employeeId) => {
+        if (!Types.ObjectId.isValid(employeeId)) {
+            return null;
+        }
+        return await this.messageModel.find({ employeeId })
+    }
+
+    find = async (skip, limit) => {
         return await this.messageModel
             .find()
-            .select('-propertyId')
+            .skip(skip)
+            .limit(limit)
             .sort({ createdAt: -1 })
             .lean()
+    }
+
+    count = async () => {
+        return await this.messageModel.countDocuments()
     }
 }

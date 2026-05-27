@@ -78,4 +78,9 @@ export class AuthController {
   async find() {
     return await this.authService.find()
   }
+
+  @MessagePattern(AUTH_PATTERNS.FIND_ACCOUNTS_FOR_CONTACTS)
+  async findOneForContactService(@Payload() request) {
+    return await this.authService.findOneForContactService(request)
+  }
 }

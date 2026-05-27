@@ -212,6 +212,15 @@ export class AuthService {
         }
     }
 
+    findOneForContactService = async (_id) => {
+        const response = await this.authDb.findById(_id)
+
+        return {
+            _id: response!._id,
+            name: response!.name,
+        }
+    }
+
     /*==========================
       HELPER FUNCTIONS
     ============================*/

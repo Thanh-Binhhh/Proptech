@@ -41,6 +41,9 @@ export class Message {
 
     @Prop({})
     propertyId!: string
+
+    @Prop({})
+    employeeId!: string
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message)

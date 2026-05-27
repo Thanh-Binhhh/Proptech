@@ -138,8 +138,9 @@ export class PostsService {
     const response = await this.findOne(_id)
 
     return {
-      title: response!.data!.title,
-      cover_picture: response!.data!.cover_picture
+      _id: response.data!._id,
+      title: response.data!.title,
+      cover_picture: response.data!.cover_picture
     }
   }
 

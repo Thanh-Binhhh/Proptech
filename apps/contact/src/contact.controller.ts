@@ -15,11 +15,11 @@ export class ContactController {
 
   @MessagePattern(CONTACTS_PATTERNS.UPDATE)
   async update(@Payload() payload: {
-    return
+    accessToken: string,
     _id: string,
     request: UpdateStatusDto
   }) {
-    return await this.contactService.update(payload._id, payload.request)
+    return await this.contactService.update(payload)
   }
 
   @MessagePattern(CONTACTS_PATTERNS.FIND_ONE)
@@ -28,7 +28,7 @@ export class ContactController {
   }
 
   @MessagePattern(CONTACTS_PATTERNS.FIND)
-  async find() {
-    return await this.contactService.find()
+  async find(@Payload() request: number) {
+    return await this.contactService.find(request)
   }
 }

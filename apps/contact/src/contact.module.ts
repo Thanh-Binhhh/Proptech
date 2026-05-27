@@ -6,7 +6,9 @@ import { ContactService } from './contact.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Message, MessageSchema } from '../schemas/contact.schema';
 import { ContactDb } from './contact.db';
-import { POSTS } from 'libs/contracts/constant';
+import { AUTH, POSTS } from 'libs/contracts/constant';
+import { JwtModule } from '@nestjs/jwt';
+import { SignOptions } from 'jsonwebtoken';
 
 @Module({
   imports: [
@@ -14,6 +16,21 @@ import { POSTS } from 'libs/contracts/constant';
       isGlobal: true,
       envFilePath: 'apps/contact/.env'
     }),
+
+    ClientsModule.registerAsync([
+      {
+        name: AUTH,
+        imports: [ConfigModule],
+        inject: [ConfigService],
+        useFactory: async (configService: ConfigService) => ({
+          transport: Transport.TCP,
+          options: {
+            host: configService.get<string>('AUTH_HOST'),
+            port: Number(configService.get<string>('AUTH_PORT')),
+          },
+        }),
+      },
+    ]),
 
     ClientsModule.registerAsync([
       {
@@ -43,6 +60,18 @@ import { POSTS } from 'libs/contracts/constant';
         uri: configService.get<string>('MONGO_URI'),
         dbName: configService.get<string>('MONGO_DB')
       })
+    }),
+
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      global: true,
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('SECRET_KEY'),
+        signOptions: {
+          expiresIn: (configService.get<string>('JWT_ACCESS_TOKEN_EXPIRED') || '15m') as SignOptions['expiresIn'],
+        }
+      }),
+      inject: [ConfigService]
     }),
   ],
   controllers: [ContactController],

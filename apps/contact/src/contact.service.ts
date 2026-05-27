@@ -1,15 +1,21 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { JwtService } from '@nestjs/jwt';
 import { ContactDb } from './contact.db';
 import { throwRpcException } from '@app/contracts/helper-functions';
-import { POSTS } from 'libs/contracts/constant';
-import { POSTS_PATTERNS } from '@app/contracts/posts/books.patterns';
 import { firstValueFrom } from 'rxjs';
+import { AUTH, POSTS } from 'libs/contracts/constant';
+import { POSTS_PATTERNS } from '@app/contracts/posts/books.patterns';
+import { AUTH_PATTERNS } from '@app/contracts/auth/auth.patterns';
 
 @Injectable()
 export class ContactService {
   constructor(
     private readonly contactDb: ContactDb,
+    private readonly jwtService: JwtService,
+
+    @Inject(AUTH)
+    private readonly authService: ClientProxy,
 
     @Inject(POSTS)
     private readonly postService: ClientProxy
@@ -24,7 +30,7 @@ export class ContactService {
         await firstValueFrom(
           this.postService.send(POSTS_PATTERNS.FIND_ONE, request.propertyId),
         );
-      } catch (error) {
+      } catch (error: any) {
         throwRpcException(error!.statusCode, error?.message,);
       }
     }
@@ -37,10 +43,16 @@ export class ContactService {
     }
   }
 
-  update = async (_id, request) => {
+  update = async (request) => {
+    const { accessToken, _id, status } = request
     await this.findOne(_id)
 
-    const response = await this.contactDb.update(_id, request.status)
+    const payload = await this.jwtService.verifyAsync(
+      accessToken, {
+      secret: process.env.SECRET_KEY
+    })
+
+    const response = await this.contactDb.update(_id, status, payload.sub)
 
     return {
       message: 'Cập nhật trang thái yêu cầu tư vấn thành công',
@@ -53,6 +65,7 @@ export class ContactService {
   ============================*/
   findOne = async (_id) => {
     let property
+    let employee
 
     const response = await this.contactDb.findOne(_id)
     if (!response)
@@ -64,22 +77,115 @@ export class ContactService {
       );
     }
 
+    if (response.employeeId) {
+      employee = await firstValueFrom(
+        this.authService.send(AUTH_PATTERNS.FIND_ACCOUNTS_FOR_CONTACTS, response.employeeId),
+      );
+    }
+
     return {
       message: 'Lấy thông tin yêu cầu tư vấn thành công',
       data: response,
-      property
+      property,
+      employee
     }
   }
 
-  find = async () => {
-    const response = await this.contactDb.find()
 
-    if (!response)
-      return { message: 'Khách hàng chưa gửi yêu cầu nào.' }
+  find = async (page) => {
+    const limit = 12
+    const skip = (page - 1) * limit
+
+    const total = await this.contactDb.count()
+    const totalPages = Math.ceil(total / limit)
+    if (page > totalPages)
+      return throwRpcException(409, "Tham số truy vấn không hợp lệ")
+
+    const response = await this.contactDb.find(skip, limit);
+    if (!response) {
+      return {
+        message: 'Khách hàng chưa gửi yêu cầu nào.',
+      };
+    }
+
+    // Get set of propertyId and set of employeeId from contact
+    const propertyIds = [
+      ...new Set(
+        response
+          .map((contact) => contact.propertyId?.toString())
+          .filter(Boolean),
+      ),
+    ];
+
+    const employeeIds = [
+      ...new Set(
+        response
+          .map((contact) => contact.employeeId?.toString())
+          .filter(Boolean),
+      ),
+    ];
+
+    // Get details posts and employees from posts and auth services
+    const [propertyMap, employeeMap] = await Promise.all([
+      this.buildMap(
+        propertyIds,
+        POSTS_PATTERNS.FIND_ONE_FOR_CONTACT,
+        this.postService,
+      ),
+
+      this.buildMap(
+        employeeIds,
+        AUTH_PATTERNS.FIND_ACCOUNTS_FOR_CONTACTS,
+        this.authService,
+      ),
+    ]);
+
+    const data = response.map((contact) => {
+      const propertyId = contact.propertyId?.toString();
+      const employeeId = contact.employeeId?.toString();
+      const property = propertyId ? propertyMap.get(propertyId) : null;
+      const employee = employeeId ? employeeMap.get(employeeId) : null;
+
+      return {
+        ...contact,
+        ...(property ? { property } : {}),
+        ...(employee ? { employee } : {}),
+      };
+    });
 
     return {
-      message: "Lấy danh sách yêu cầu tư vấn từ khách hàng thành công",
-      data: response
-    }
+      message: 'Lấy danh sách yêu cầu tư vấn từ khách hàng thành công',
+      pagination: {
+        page,
+        limit,
+        totalPages,
+      },
+      data,
+    };
+  };
+
+  /*==========================
+      HELPER FUNCTIONS
+  ============================*/
+  private buildMap = async (
+    ids: string[],
+    pattern: string,
+    service: any,
+  ) => {
+    const results = await Promise.allSettled(
+      ids.map((id) => firstValueFrom(service.send(pattern, id))),
+    );
+
+    return results.reduce((map, result) => {
+      if (result.status === 'fulfilled') {
+        const item: any = result.value;
+
+        if (item?._id) {
+          map.set(item._id.toString(), item);
+        }
+      }
+
+      return map;
+    }, new Map<string, any>());
   }
 }

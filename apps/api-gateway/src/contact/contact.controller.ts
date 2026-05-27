@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, UseGuards, Query, DefaultValuePipe, ParseIntPipe, Req } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { Public } from '../guards/decorator/public.decorater';
 import { ContactService } from './contact.service';
@@ -17,8 +17,12 @@ export class ContactController {
   }
 
   @Patch(':_id')
-  async update(@Param('_id') _id: string, @Body() request: UpdateStatusDto) {
-    return await this.contactService.update(_id, request);
+  async update(
+    @Req() req: Request,
+    @Param('_id') _id: string,
+    @Body() request: UpdateStatusDto
+  ) {
+    return await this.contactService.update(req, _id, request);
   }
 
   @Get(':_id')
@@ -27,7 +31,9 @@ export class ContactController {
   }
 
   @Get()
-  async findAll() {
-    return await this.contactService.find();
+  async find(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+  ) {
+    return await this.contactService.find(page);
   }
 }
