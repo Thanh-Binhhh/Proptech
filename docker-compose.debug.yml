@@ -1,0 +1,20 @@
+services:
+  api-gateway:
+    command: npx nest start api-gateway --debug 0.0.0.0:9229 --watch
+    ports:
+      - '9229:9229'
+
+  auth:
+    command: npx nest start auth --debug 0.0.0.0:9232 --watch
+    ports:
+      - '9232:9232'
+
+  contact:
+    command: npx nest start contact --debug 0.0.0.0:9230 --watch
+    ports:
+      - '9230:9230'
+
+  posts:
+    command: npx nest start posts --debug 0.0.0.0:9231 --watch
+    ports:
+      - '9231:9231'

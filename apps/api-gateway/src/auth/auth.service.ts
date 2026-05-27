@@ -120,14 +120,14 @@ export class AuthService {
     private setTokens = async (tokens, res) => {
         res.cookie('access_token', tokens.accessToken, {
             httpOnly: true,
-            secure: false,
+            secure: true,
             sameSite: 'lax',
             maxAge: 15 * 60 * 1000, // 15m
         })
 
         res.cookie('refresh_token', tokens.refreshToken, {
             httpOnly: true,
-            secure: false,
+            secure: true,
             sameSite: 'lax',
             maxAge: 24 * 60 * 60 * 1000, // 1d
         })

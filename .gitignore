@@ -1,7 +1,16 @@
-# compiled output
-/dist
-/node_modules
-/build
+# Dependencies
+node_modules
+**/node_modules
+
+# Compiled output
+dist
+**/dist
+build
+**/build
+
+# Git
+.git
+.gitignore
 
 # Logs
 logs
@@ -14,13 +23,16 @@ lerna-debug.log*
 
 # OS
 .DS_Store
+Thumbs.db
 
 # Tests
-/coverage
-/.nyc_output
+coverage
+**/coverage
+.nyc_output
 
 # IDEs and editors
-/.idea
+.idea
+.vscode
 .project
 .classpath
 .c9/
@@ -28,23 +40,20 @@ lerna-debug.log*
 .settings/
 *.sublime-workspace
 
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
-# dotenv environment variable files
+# Env files
 .env
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
+.env.*
+apps/*/.env
+apps/*/.env.*
 
-# temp directory
+# Cache
+.cache
+.turbo
+.nx
+.angular
 .temp
 .tmp
+tmp
 
 # Runtime data
 pids
@@ -52,5 +61,12 @@ pids
 *.seed
 *.pid.lock
 
-# Diagnostic reports (https://nodejs.org/api/report.html)
+# Uploads / media / local files
+uploads
+**/uploads
+public/uploads
+storage
+**/storage
+
+# Diagnostic reports
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json

@@ -20,11 +20,11 @@ import { POSTS } from 'libs/contracts/constant';
         name: POSTS,
         imports: [ConfigModule],
         inject: [ConfigService],
-        useFactory: async () => ({
+        useFactory: async (configService: ConfigService) => ({
           transport: Transport.TCP,
           options: {
-            host: 'localhost',
-            port: 4001,
+            host: configService.get<string>('POSTS_HOST'),
+            port: Number(configService.get<string>('POSTS_PORT')),
           },
         }),
       },

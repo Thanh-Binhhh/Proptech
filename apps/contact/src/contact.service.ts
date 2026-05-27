@@ -4,6 +4,7 @@ import { ContactDb } from './contact.db';
 import { throwRpcException } from '@app/contracts/helper-functions';
 import { POSTS } from 'libs/contracts/constant';
 import { POSTS_PATTERNS } from '@app/contracts/posts/books.patterns';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class ContactService {
@@ -18,8 +19,15 @@ export class ContactService {
       CU CONTACTS
   ============================*/
   create = async (request) => {
+    let property
+
     if (request.propertyId) {
-      // await this.postService.send(POSTS_PATTERNS.FIND_ONE, request.propertyId);
+      property = await firstValueFrom(
+        this.postService.send(
+          POSTS_PATTERNS.FIND_ONE,
+          request.propertyId,
+        ),
+      );
     }
 
     const response = await this.contactDb.create(request)
