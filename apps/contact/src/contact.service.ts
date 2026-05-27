@@ -19,15 +19,14 @@ export class ContactService {
       CU CONTACTS
   ============================*/
   create = async (request) => {
-    let property
-
     if (request.propertyId) {
-      property = await firstValueFrom(
-        this.postService.send(
-          POSTS_PATTERNS.FIND_ONE,
-          request.propertyId,
-        ),
-      );
+      try {
+        await firstValueFrom(
+          this.postService.send(POSTS_PATTERNS.FIND_ONE, request.propertyId),
+        );
+      } catch (error) {
+        throwRpcException(error!.statusCode, error?.message,);
+      }
     }
 
     const response = await this.contactDb.create(request)
@@ -53,13 +52,22 @@ export class ContactService {
       QUERY CONTACTS
   ============================*/
   findOne = async (_id) => {
+    let property
+
     const response = await this.contactDb.findOne(_id)
     if (!response)
       return throwRpcException(404, 'Không tìm thấy yêu cầu tư vấn tương ứng')
 
+    if (response.propertyId) {
+      property = await firstValueFrom(
+        this.postService.send(POSTS_PATTERNS.FIND_ONE_FOR_CONTACT, response.propertyId),
+      );
+    }
+
     return {
       message: 'Lấy thông tin yêu cầu tư vấn thành công',
-      data: response
+      data: response,
+      property
     }
   }
 

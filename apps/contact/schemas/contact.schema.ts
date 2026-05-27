@@ -5,8 +5,7 @@ export type MessageDocument = HydratedDocument<Message>
 
 export enum MessageStatus {
     NEW = 'Mới',
-    IN_PROGRESS = 'Chờ xử lý',
-    CONTACTED = 'Đã liên hệ',
+    IN_PROGRESS = 'Đang xử lý',
     RESOLVED = 'Đã xử lý',
     SPAM = 'Tin rác',
 }

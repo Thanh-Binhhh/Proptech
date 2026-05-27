@@ -35,6 +35,7 @@ export class ContactDb {
     find = async () => {
         return await this.messageModel
             .find()
+            .select('-propertyId')
             .sort({ createdAt: -1 })
             .lean()
     }

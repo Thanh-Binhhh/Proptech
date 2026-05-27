@@ -30,6 +30,11 @@ export class PostsController {
     return await this.postsService.findOne(request)
   }
 
+  @MessagePattern(POSTS_PATTERNS.FIND_ONE_FOR_CONTACT)
+  async findOneForContactService(@Payload() request: string) {
+    return await this.postsService.findOneForContactService(request)
+  }
+
   @MessagePattern(POSTS_PATTERNS.FIND)
   async find(@Payload() request: number) {
     return await this.postsService.find(request)

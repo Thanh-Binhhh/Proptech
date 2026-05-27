@@ -3,6 +3,7 @@ import { CloudinaryService, UploadedImageResult } from './pictures/cloudinary.se
 import { PostsDb } from './posts.db';
 import { PostStatus } from './schemas/posts.schema';
 import { throwRpcException } from '@app/contracts/helper-functions';
+import { title } from 'process';
 
 @Injectable()
 export class PostsService {
@@ -79,7 +80,7 @@ export class PostsService {
       }
 
       if (request.status === PostStatus.PUBLISHED &&
-        oldPost.data.status !== PostStatus.PUBLISHED) {
+        oldPost.data!.status !== PostStatus.PUBLISHED) {
         message = 'Cập nhật bài đăng thành công. Cần chờ quản lý duyệt trước khi xuất bản'
       }
 
@@ -125,11 +126,20 @@ export class PostsService {
   findOne = async (_id) => {
     const response = await this.postsDb.findOne(_id)
     if (!response)
-      return throwRpcException(404, 'Không tìm thấy bài đăng tương ứng')
+      throwRpcException(404, 'Không tìm thấy bài đăng tương ứng')
 
     return {
       message: 'Lấy thông tin bài đăng thành công',
       data: response
+    }
+  }
+
+  findOneForContactService = async (_id) => {
+    const response = await this.findOne(_id)
+
+    return {
+      title: response!.data!.title,
+      cover_picture: response!.data!.cover_picture
     }
   }
 
