@@ -1,12 +1,36 @@
 import { Controller } from '@nestjs/common';
-import { PostsService } from './posts.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { POSTS_PATTERNS } from '@app/contracts/posts/books.patterns';
+import { CATEGORIES_PATTERNS } from '@app/contracts/posts/categories.patterns';
 import { CreatePostDto } from '@app/contracts/posts/post.dto';
+import { CreateCategoryDto } from '@app/contracts/posts/category.dto';
+import { PostsService } from './posts.service';
+import { CategoriesService } from './categories/categories.service';
 
 @Controller()
 export class PostsController {
-  constructor(private readonly postsService: PostsService) { }
+  constructor(
+    private readonly categoriesService: CategoriesService,
+    private readonly postsService: PostsService
+  ) { }
+
+  @MessagePattern(CATEGORIES_PATTERNS.CREATE)
+  async createCategory(@Payload() request: CreateCategoryDto) {
+    return await this.categoriesService.create(request);
+  }
+
+  @MessagePattern(CATEGORIES_PATTERNS.UPDATE)
+  async editCategory(@Payload() payload: {
+    _id: string,
+    request: CreatePostDto,
+  }) {
+    return await this.categoriesService.edit(payload._id, payload.request);
+  }
+
+  @MessagePattern(CATEGORIES_PATTERNS.FIND)
+  async findCategory() {
+    return await this.categoriesService.find()
+  }
 
   @MessagePattern(POSTS_PATTERNS.CREATE)
   async create(@Payload() payload: {

@@ -63,17 +63,18 @@ export class Post {
     })
     status!: PostStatus;
 
-    @Prop({})
     publication_date!: Date;
 
-    @Prop({
-        required: true,
-    })
+    @Prop({ required: true })
+    author!: string
+
+    @Prop({ required: true })
+    categoryId!: string
+
+    @Prop({ required: true })
     htmlSource!: string
 
-    @Prop({
-        required: true,
-    })
+    @Prop({ required: true })
     jsonSource!: string
 }
 

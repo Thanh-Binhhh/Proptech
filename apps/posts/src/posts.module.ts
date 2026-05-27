@@ -7,6 +7,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Post, PostSchema } from './schemas/posts.schema';
 import { PostsDb } from './posts.db';
 import { CloudinaryProvider } from './pictures/cloudinary.provider';
+import { CategoriesService } from './categories/categories.service';
+import { CategoriesDb } from './categories/categories.db';
+import { Category, CategorySchema } from './schemas/categories.schema';
 
 @Module({
   imports: [
@@ -20,7 +23,13 @@ import { CloudinaryProvider } from './pictures/cloudinary.provider';
         name: Post.name,
         schema: PostSchema,
       },
+    ]),
 
+    MongooseModule.forFeature([
+      {
+        name: Category.name,
+        schema: CategorySchema,
+      },
     ]),
 
     MongooseModule.forRootAsync({
@@ -32,6 +41,6 @@ import { CloudinaryProvider } from './pictures/cloudinary.provider';
     }),
   ],
   controllers: [PostsController],
-  providers: [PostsService, CloudinaryService, CloudinaryProvider, PostsDb],
+  providers: [PostsService, CloudinaryService, CategoriesService, CloudinaryProvider, PostsDb, CategoriesDb],
 })
 export class PostsModule { }

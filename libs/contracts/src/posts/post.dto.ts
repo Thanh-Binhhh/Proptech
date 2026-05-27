@@ -1,9 +1,7 @@
-import { Prop } from '@nestjs/mongoose'
-import { PostStatus, Region } from 'apps/posts/src/schemas/posts.schema'
+import { Region } from 'apps/posts/src/schemas/posts.schema'
 import {
     IsEnum,
     IsNotEmpty,
-    IsOptional,
     IsString
 } from 'class-validator'
 
@@ -24,10 +22,9 @@ export class CreatePostDto {
     @IsNotEmpty()
     region!: string
 
-    @IsEnum(PostStatus, { message: "Trạng thái bài đăng không hợp lệ." })
-    @Prop({ default: PostStatus.DRAFT })
-    @IsOptional()
-    status!: string
+    @IsString()
+    @IsNotEmpty()
+    categoryId!: string
 
     @IsString()
     @IsNotEmpty()
