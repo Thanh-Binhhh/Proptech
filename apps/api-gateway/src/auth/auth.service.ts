@@ -121,14 +121,14 @@ export class AuthService {
         res.cookie('access_token', tokens.accessToken, {
             httpOnly: true,
             secure: true,
-            sameSite: 'lax',
+            sameSite: 'none',
             maxAge: 15 * 60 * 1000, // 15m
         })
 
         res.cookie('refresh_token', tokens.refreshToken, {
             httpOnly: true,
             secure: true,
-            sameSite: 'lax',
+            sameSite: 'none',
             maxAge: 24 * 60 * 60 * 1000, // 1d
         })
     }
