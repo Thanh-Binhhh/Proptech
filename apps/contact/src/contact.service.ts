@@ -5,7 +5,7 @@ import { ContactDb } from './contact.db';
 import { throwRpcException } from '@app/contracts/helper-functions';
 import { firstValueFrom } from 'rxjs';
 import { AUTH, POSTS } from 'libs/contracts/constant';
-import { POSTS_PATTERNS } from '@app/contracts/posts/books.patterns';
+import { POSTS_PATTERNS } from '@app/contracts/posts/posts.patterns';
 import { AUTH_PATTERNS } from '@app/contracts/auth/auth.patterns';
 
 @Injectable()
@@ -85,9 +85,12 @@ export class ContactService {
 
     return {
       message: 'Lấy thông tin yêu cầu tư vấn thành công',
-      data: response,
-      property,
-      employee
+      data: {
+        response,
+        property,
+        employee
+      }
+
     }
   }
 
