@@ -183,16 +183,18 @@ export class PostsService {
       throwRpcException(404, 'Không tìm thấy bài đăng tương ứng')
 
     // Format the response
-    const author = await firstValueFrom(
-      this.authService.send(AUTH_PATTERNS.FIND_ONE, response.authorId),
-    );
+    let author
+    if (accessToken) {
+      author = await firstValueFrom(
+        this.authService.send(AUTH_PATTERNS.FIND_ONE, response.authorId),
+      );
+    }
 
-    const { authorId, ...rest } = response.toObject()
-
+    const { authorId, ...res } = response.toObject()
     return {
       message: 'Lấy thông tin bài đăng thành công',
       data: {
-        ...rest,
+        ...res,
         author
       }
     }
@@ -222,8 +224,14 @@ export class PostsService {
     if (!response.length)
       return { message: 'Chưa có bài đăng nào' }
 
-    // Get set of employees from Auth service
-    const data = await this.getAuthors(response)
+    // Get set of employees from Auth service (if exist)
+    let data
+    if (accessToken)
+      data = await this.getAuthors(response)
+    else {
+      data = response
+      delete data.authorId
+    }
 
     return {
       message: 'Lấy danh sách bài đăng thành công',

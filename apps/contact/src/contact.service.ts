@@ -155,6 +155,8 @@ export class ContactService {
       };
     });
 
+    const { propertyId, employeeId, ...res } = data
+
     return {
       message: 'Lấy danh sách yêu cầu tư vấn từ khách hàng thành công',
       pagination: {
@@ -162,7 +164,7 @@ export class ContactService {
         limit,
         totalPages,
       },
-      data,
+      data: res,
     };
   };
 
