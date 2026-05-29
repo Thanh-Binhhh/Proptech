@@ -1,11 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { RpcException } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 import { CloudinaryService } from './pictures/cloudinary.service';
 import { PostsDb } from './posts.db';
-import { throwRpcException } from '@app/contracts/helper-functions';
+import { buildMap, throwRpcException } from '@app/contracts/helper-functions';
 import { JwtService } from '@nestjs/jwt';
 import { PostStatus_Stage1, PostStatus_Stage2, PostStatus_Stage3 } from './schemas/post-status';
 import { AccountRole } from '@app/contracts/auth/register.dto';
+import { AUTH } from 'libs/contracts/constant';
+import { AUTH_PATTERNS } from '@app/contracts/auth/auth.patterns';
 
 @Injectable()
 export class PostsService {
@@ -13,6 +17,9 @@ export class PostsService {
     private readonly postsDb: PostsDb,
     private readonly jwtService: JwtService,
     private readonly cloudinaryService: CloudinaryService,
+
+    @Inject(AUTH)
+    private readonly authService: ClientProxy
   ) { }
 
   /*==========================
@@ -40,7 +47,7 @@ export class PostsService {
       })
 
       let message
-      if (request.status === PostStatus_Stage1.DRAFT)
+      if (!request.status || request.status === PostStatus_Stage1.DRAFT)
         message = 'Bản nháp đã được lưu.'
       else // PostStatus_Stage1.PENDING_APPROVAL
         message = 'Bài đăng sẽ được quản lý duyệt trước khi được xuất bản.'
@@ -64,22 +71,28 @@ export class PostsService {
 
   update = async (payload) => {
     const { accessToken, _id, request, coverPicture } = payload
-
-    const oldPost = await this.findOne(_id)
-    if (!oldPost)
-      throwRpcException(404, 'Không tìm thấy bài đăng tương ứng.')
-
-    const actionBy = await this.extractUserFromToken(accessToken)
-    if (actionBy.role !== AccountRole.MANAGER)
-      throwRpcException(403, 'Người dùng không có quyền cập nhật trạng thái bài đăng')
-
     let cover_picture
+
     try {
+      const oldPost = await this.findOne({ _id })
+
+      // Only managers are allowed to 
+      // update post statuses and modify published posts.
+      const actionBy = await this.extractUserFromToken(accessToken)
+      if (actionBy.role !== AccountRole.MANAGER) {
+        if (oldPost.data.status === PostStatus_Stage2.PUBLISHED)
+          throwRpcException(403, 'Chỉ quản lý mới có thể cập nhật bài đăng đã xuất bản.')
+        else if (oldPost.data.status !== request.status
+          && oldPost.data.status !== PostStatus_Stage1.DRAFT
+          && oldPost.data.status !== PostStatus_Stage1.PENDING_APPROVAL
+        )
+          throwRpcException(403, 'Chỉ quản lý mới có thể cập nhật trạng thái bài đăng.')
+      }
+
       if (coverPicture)
         cover_picture = await this.uploadToCloudinary(coverPicture)
 
       await this.handleStatusTransition(_id, oldPost.data!.status, request, actionBy.sub)
-
       const response = await this.postsDb.update(
         _id,
         {
@@ -99,10 +112,20 @@ export class PostsService {
         }
       }
 
+      // Format the response
+      const author = await firstValueFrom(
+        this.authService.send(AUTH_PATTERNS.FIND_ONE, response.authorId),
+      );
+
+      const { authorId, ...rest } = response.toObject()
+
       return {
         message: 'Cập nhật bài đăng thành công.',
-        data: response
-      };
+        data: {
+          ...rest,
+          author
+        }
+      }
     } catch (error) {
       if (cover_picture)
         await this.cloudinaryService.delete(cover_picture.publicId);
@@ -122,11 +145,17 @@ export class PostsService {
     try {
       const { accessToken, _id, request } = payload
 
-      const oldPost = await this.findOne(_id)
-      const oldStatus = oldPost.data!.status
+      const oldPost = await this.findOne({ _id })
+      const oldStatus = oldPost.data.status
 
       const actionBy = await this.extractUserFromToken(accessToken)
       const { message, response } = await this.handleStatusTransition(_id, oldStatus, request, actionBy.sub)
+
+      const employee = await firstValueFrom(
+        this.authService.send(AUTH_PATTERNS.FIND_ONE, response.actionBy),
+      );
+
+      response.actionBy = employee
 
       return {
         message,
@@ -147,14 +176,25 @@ export class PostsService {
   /*==========================
       QUERY POSTS
   ============================*/
-  findOne = async (_id) => {
-    const response = await this.postsDb.findOne(_id)
+  findOne = async (payload) => {
+    const { accessToken, _id } = payload
+    const response = await this.postsDb.findOne(accessToken, _id)
     if (!response)
       throwRpcException(404, 'Không tìm thấy bài đăng tương ứng')
 
+    // Format the response
+    const author = await firstValueFrom(
+      this.authService.send(AUTH_PATTERNS.FIND_ONE, response.authorId),
+    );
+
+    const { authorId, ...rest } = response.toObject()
+
     return {
       message: 'Lấy thông tin bài đăng thành công',
-      data: response
+      data: {
+        ...rest,
+        author
+      }
     }
   }
 
@@ -179,8 +219,11 @@ export class PostsService {
       return throwRpcException(409, "Số trang vượt quá giới hạn.")
 
     const response = await this.postsDb.find(skip, limit, categoryId, accessToken)
-    if (!response)
+    if (!response.length)
       return { message: 'Chưa có bài đăng nào' }
+
+    // Get set of employees from Auth service
+    const data = await this.getAuthors(response)
 
     return {
       message: 'Lấy danh sách bài đăng thành công',
@@ -190,7 +233,7 @@ export class PostsService {
         totalPosts,
         totalPages,
       },
-      data: response
+      data
     }
   }
 
@@ -226,6 +269,14 @@ export class PostsService {
       throwRpcException(400, 'Trạng thái bài đăng không thay đổi.')
 
     switch (request.status) {
+      case PostStatus_Stage1.PENDING_APPROVAL:
+        if (oldStatus !== PostStatus_Stage1.DRAFT)
+          throwRpcException(400, messageForWrongStatus)
+
+        response = await this.createStatusHistory(_id, request, actionBy)
+        message = 'Bài đăng đã vào trạng thái chờ duyệt.'
+        break
+
       case PostStatus_Stage2.REJECTED:
         if (oldStatus !== PostStatus_Stage1.PENDING_APPROVAL)
           throwRpcException(400, messageForWrongStatus)
@@ -239,10 +290,12 @@ export class PostsService {
 
       case PostStatus_Stage2.PUBLISHED:
         if (oldStatus !== PostStatus_Stage1.PENDING_APPROVAL
-          || oldStatus !== PostStatus_Stage3.PUBLISHED
-        )
+          && oldStatus !== PostStatus_Stage3.PRIVATE
+        ) {
+          console.log(oldStatus)
+          console.log(PostStatus_Stage1.PENDING_APPROVAL)
           throwRpcException(400, messageForWrongStatus)
-
+        }
         response = await this.createStatusHistory(_id, request, actionBy, true)
         message = 'Bạn đã duyệt thành công. Bài đăng sẽ được xuất hiện công khai.'
         break
@@ -269,5 +322,33 @@ export class PostsService {
     }
 
     return await this.postsDb.createStatusHistory(_id, payload)
+  }
+
+  private getAuthors = async (response) => {
+    const authorIds = [
+      ...new Set(
+        response
+          .map((post) => post.authorId?.toString())
+          .filter(Boolean),
+      ),
+    ];
+
+    const [authorMap] = await Promise.all([
+      buildMap(
+        authorIds,
+        AUTH_PATTERNS.FIND_ONE,
+        this.authService,
+      ),
+    ]);
+
+    return response.map((post) => {
+      const { authorId, ...rest } = post
+      const author = authorMap.get(authorId)
+
+      return {
+        ...rest,
+        ...(author ? { author } : {}),
+      };
+    });
   }
 }

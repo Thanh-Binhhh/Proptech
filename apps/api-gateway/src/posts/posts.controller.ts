@@ -70,8 +70,11 @@ export class PostsController {
 
   @Public()
   @Get(':_id')
-  async findOne(@Param('_id') _id: string) {
-    return this.postsService.findOne(_id);
+  async findOne(
+    @Req() req: Request,
+    @Param('_id') _id: string
+  ) {
+    return this.postsService.findOne(req, _id);
   }
 
   @Public()

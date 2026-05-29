@@ -74,13 +74,13 @@ export class AuthController {
     return await this.authService.resetPassword(payload.token, payload.request)
   }
 
-  @MessagePattern(AUTH_PATTERNS.FIND_ACCOUNTS)
+  @MessagePattern(AUTH_PATTERNS.FIND)
   async find() {
     return await this.authService.find()
   }
 
-  @MessagePattern(AUTH_PATTERNS.FIND_ACCOUNTS_FOR_CONTACTS)
+  @MessagePattern(AUTH_PATTERNS.FIND_ONE)
   async findOneForContactService(@Payload() request) {
-    return await this.authService.findOneForContactService(request)
+    return await this.authService.findOne(request)
   }
 }

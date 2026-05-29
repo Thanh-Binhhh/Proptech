@@ -62,8 +62,11 @@ export class PostsController {
   }
 
   @MessagePattern(POSTS_PATTERNS.FIND_ONE)
-  async findOne(@Payload() request: string) {
-    return await this.postsService.findOne(request)
+  async findOne(@Payload() payload: {
+    accessToken: string,
+    _id: string
+  }) {
+    return await this.postsService.findOne(payload)
   }
 
   @MessagePattern(POSTS_PATTERNS.FIND_ONE_FOR_CONTACT)

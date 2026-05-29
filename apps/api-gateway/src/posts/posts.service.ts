@@ -69,9 +69,10 @@ export class PostsService {
     }
   }
 
-  findOne = async (_id) => {
+  findOne = async (req, _id) => {
     try {
-      return await this.postsClient.send(POSTS_PATTERNS.FIND_ONE, _id);
+      const accessToken = req.cookies?.access_token
+      return await this.postsClient.send(POSTS_PATTERNS.FIND_ONE, { accessToken, _id });
     } catch (error) {
       handleMicroserviceError(error)
     }

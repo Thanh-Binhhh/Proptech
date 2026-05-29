@@ -7,6 +7,6 @@ export const AUTH_PATTERNS = {
     ME: 'get-me',
     REQUEST_RESET_PASSWORD: 'request-reset-password',
     RESET_PASSWORD: 'reset-password',
-    FIND_ACCOUNTS: 'find-accounts',
-    FIND_ACCOUNTS_FOR_CONTACTS: 'find-accounts-for-contact-service'
+    FIND: 'find',
+    FIND_ONE: 'find-one'
 }

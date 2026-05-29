@@ -1,5 +1,6 @@
 import { HttpException, UnauthorizedException } from "@nestjs/common";
 import { RpcException } from "@nestjs/microservices";
+import { firstValueFrom } from 'rxjs';
 
 const getTokenFromCookies = async (req, type = 'refresh') => {
     try {
@@ -32,6 +33,28 @@ const getTokenFromHeaders = async (req) => {
     }
 }
 
+const buildMap = async (
+    ids: string[],
+    pattern: string,
+    service: any,
+) => {
+    const results = await Promise.allSettled(
+        ids.map((id) => firstValueFrom(service.send(pattern, id))),
+    );
+
+    return results.reduce((map, result) => {
+        if (result.status === 'fulfilled') {
+            const item: any = result.value;
+
+            if (item?._id) {
+                map.set(item._id.toString(), item);
+            }
+        }
+
+        return map;
+    }, new Map<string, any>());
+}
+
 const throwRpcException = (statusCode, message): never => {
     throw new RpcException({
         statusCode,
@@ -55,6 +78,7 @@ const handleMicroserviceError = (error) => {
 export {
     getTokenFromCookies,
     getTokenFromHeaders,
+    buildMap,
     throwRpcException,
     handleMicroserviceError
 }

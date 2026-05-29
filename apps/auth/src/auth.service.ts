@@ -212,7 +212,7 @@ export class AuthService {
         }
     }
 
-    findOneForContactService = async (_id) => {
+    findOne = async (_id) => {
         const response = await this.authDb.findById(_id)
 
         return {

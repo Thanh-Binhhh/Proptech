@@ -25,12 +25,12 @@ export class CreatePostDto {
     region?: string
 
     @IsEnum(PostStatus_Stage1, { message: "Trạng thái bài đăng này không hợp lệ" })
-    @IsNotEmpty()
+    @IsOptional()
     status?: string
 
     @IsString()
     @IsNotEmpty()
-    categoryId!: string
+    category!: string
 
     @IsString()
     @IsOptional()

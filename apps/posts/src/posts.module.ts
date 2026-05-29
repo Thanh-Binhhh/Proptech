@@ -1,18 +1,20 @@
 import { Module } from '@nestjs/common';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
+import { SignOptions } from 'jsonwebtoken';
+import { MongooseModule } from '@nestjs/mongoose';
+import { Post, PostSchema } from './schemas/create-posts.schema';
 import { PostsController } from './posts.controller';
 import { PostsService } from './posts.service';
 import { CloudinaryService } from './pictures/cloudinary.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
-import { Post, PostSchema } from './schemas/create-posts.schema';
 import { PostsDb } from './posts.db';
 import { CloudinaryProvider } from './pictures/cloudinary.provider';
 import { CategoriesService } from './categories/categories.service';
 import { CategoriesDb } from './categories/categories.db';
 import { Category, CategorySchema } from './schemas/categories.schema';
-import { JwtModule } from '@nestjs/jwt';
-import { SignOptions } from 'jsonwebtoken';
 import { PostStatusHistory, PostStatusHistorySchema } from './schemas/status-history.schema';
+import { AUTH } from 'libs/contracts/constant';
 
 @Module({
   imports: [
@@ -60,7 +62,22 @@ import { PostStatusHistory, PostStatusHistorySchema } from './schemas/status-his
         }
       }),
       inject: [ConfigService]
-    })
+    }),
+
+    ClientsModule.registerAsync([
+      {
+        name: AUTH,
+        imports: [ConfigModule],
+        inject: [ConfigService],
+        useFactory: async (configService: ConfigService) => ({
+          transport: Transport.TCP,
+          options: {
+            host: configService.get<string>('AUTH_HOST'),
+            port: Number(configService.get<string>('AUTH_PORT')),
+          },
+        }),
+      },
+    ]),
   ],
   controllers: [PostsController],
   providers: [PostsService, CloudinaryService, CategoriesService, CloudinaryProvider, PostsDb, CategoriesDb],

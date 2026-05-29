@@ -3,7 +3,6 @@ import { Post } from "./schemas/create-posts.schema";
 import { Model, Types } from "mongoose";
 import { PostStatusHistory } from "./schemas/status-history.schema";
 import { PostStatus_Stage1, PostStatus_Stage2 } from "./schemas/post-status";
-import { Category } from "./schemas/categories.schema";
 
 export class PostsDb {
     constructor(
@@ -24,6 +23,7 @@ export class PostsDb {
             { $set: request },
             { new: true },
         )
+            .populate('category', 'name')
     }
 
     updateStatus = async (_id, status) => {
@@ -41,11 +41,18 @@ export class PostsDb {
         });
     }
 
-    findOne = async (_id) => {
+    findOne = async (token, _id) => {
+        let select = token
+            ? ''
+            : '-authorId'
+
         if (!Types.ObjectId.isValid(_id)) {
             return null;
         }
-        return await this.postModel.findById(_id)
+        return await this.postModel
+            .findById(_id)
+            .select(select)
+            .populate('category', 'name')
     }
 
     find = async (skip, limit, categoryId, token) => {
@@ -75,9 +82,9 @@ export class PostsDb {
     /*==========================
         HELPER FUNCTIONS
     ============================*/
-    private filter = (token, categoryId) => {
+    private filter = (token, category) => {
         return {
-            categoryId,
+            category,
             ...(token ? { status: { $ne: PostStatus_Stage1.DRAFT } } : { status: PostStatus_Stage2.PUBLISHED })
         }
     }

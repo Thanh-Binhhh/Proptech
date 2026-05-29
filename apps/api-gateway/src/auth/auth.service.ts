@@ -1,4 +1,4 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { AUTH } from '../../../../libs/contracts/constant';
@@ -106,7 +106,7 @@ export class AuthService {
     find = async () => {
         try {
             const response = await firstValueFrom(
-                this.authService.send(AUTH_PATTERNS.FIND_ACCOUNTS, {})
+                this.authService.send(AUTH_PATTERNS.FIND, {})
             )
             return response
         } catch (error) {

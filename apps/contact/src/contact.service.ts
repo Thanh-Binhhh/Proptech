@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { JwtService } from '@nestjs/jwt';
 import { ContactDb } from './contact.db';
-import { throwRpcException } from '@app/contracts/helper-functions';
+import { buildMap, throwRpcException } from '@app/contracts/helper-functions';
 import { firstValueFrom } from 'rxjs';
 import { AUTH, POSTS } from 'libs/contracts/constant';
 import { POSTS_PATTERNS } from '@app/contracts/posts/posts.patterns';
@@ -79,7 +79,7 @@ export class ContactService {
 
     if (response.employeeId) {
       employee = await firstValueFrom(
-        this.authService.send(AUTH_PATTERNS.FIND_ACCOUNTS_FOR_CONTACTS, response.employeeId),
+        this.authService.send(AUTH_PATTERNS.FIND_ONE, response.employeeId),
       );
     }
 
@@ -129,15 +129,15 @@ export class ContactService {
 
     // Get details posts and employees from posts and auth services
     const [propertyMap, employeeMap] = await Promise.all([
-      this.buildMap(
+      buildMap(
         propertyIds,
         POSTS_PATTERNS.FIND_ONE_FOR_CONTACT,
         this.postService,
       ),
 
-      this.buildMap(
+      buildMap(
         employeeIds,
-        AUTH_PATTERNS.FIND_ACCOUNTS_FOR_CONTACTS,
+        AUTH_PATTERNS.FIND_ONE,
         this.authService,
       ),
     ]);
@@ -169,25 +169,5 @@ export class ContactService {
   /*==========================
       HELPER FUNCTIONS
   ============================*/
-  private buildMap = async (
-    ids: string[],
-    pattern: string,
-    service: any,
-  ) => {
-    const results = await Promise.allSettled(
-      ids.map((id) => firstValueFrom(service.send(pattern, id))),
-    );
 
-    return results.reduce((map, result) => {
-      if (result.status === 'fulfilled') {
-        const item: any = result.value;
-
-        if (item?._id) {
-          map.set(item._id.toString(), item);
-        }
-      }
-
-      return map;
-    }, new Map<string, any>());
-  }
 }
