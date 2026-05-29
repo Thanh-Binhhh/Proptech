@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { POSTS } from '../../../../libs/contracts/constant';
 import { ClientProxy } from '@nestjs/microservices';
-import { POSTS_PATTERNS } from '@app/contracts/posts/books.patterns';
-import { handleMicroserviceError } from '@app/contracts/helper-functions';
+import { POSTS_PATTERNS } from '@app/contracts/posts/posts.patterns';
+import { getTokenFromCookies, handleMicroserviceError } from '@app/contracts/helper-functions';
 import { CATEGORIES_PATTERNS } from '@app/contracts/posts/categories.patterns';
 
 @Injectable()
@@ -42,17 +42,28 @@ export class PostsService {
   /*==========================
     POSTS
   ============================*/
-  create = async (request, coverPicture) => {
+  create = async (req, request, coverPicture) => {
     try {
-      return await this.postsClient.send(POSTS_PATTERNS.CREATE, { request, coverPicture });
+      const accessToken = await getTokenFromCookies(req, 'access')
+      return await this.postsClient.send(POSTS_PATTERNS.CREATE, { accessToken, request, coverPicture });
     } catch (error) {
       handleMicroserviceError(error)
     }
   }
 
-  update = async (_id, request, coverPicture) => {
+  update = async (req, _id, request, coverPicture) => {
     try {
-      return await this.postsClient.send(POSTS_PATTERNS.UPDATE, { _id, request, coverPicture });
+      const accessToken = await getTokenFromCookies(req, 'access')
+      return await this.postsClient.send(POSTS_PATTERNS.UPDATE, { accessToken, _id, request, coverPicture });
+    } catch (error) {
+      handleMicroserviceError(error)
+    }
+  }
+
+  updateStatus = async (req, _id, request) => {
+    try {
+      const accessToken = await getTokenFromCookies(req, 'access')
+      return await this.postsClient.send(POSTS_PATTERNS.UPDATE_STATUS, { accessToken, _id, request });
     } catch (error) {
       handleMicroserviceError(error)
     }
@@ -66,9 +77,10 @@ export class PostsService {
     }
   }
 
-  find = async (page) => {
+  find = async (req, page, categoryId) => {
     try {
-      return await this.postsClient.send(POSTS_PATTERNS.FIND, page);
+      const accessToken = req.cookies?.access_token
+      return await this.postsClient.send(POSTS_PATTERNS.FIND, { accessToken, page, categoryId });
     } catch (error) {
       handleMicroserviceError(error)
     }

@@ -1,11 +1,11 @@
 import { MessageStatus } from 'apps/contact/schemas/contact.schema'
 import {
     IsEnum,
-    IsNotEmpty,
+    IsOptional,
 } from 'class-validator'
 
 export class UpdateStatusDto {
     @IsEnum(MessageStatus, { message: "Trạng thái của yêu cầu liên hệ không hợp lệ" })
-    @IsNotEmpty()
+    @IsOptional()
     status!: string
 }

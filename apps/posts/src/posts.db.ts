@@ -1,11 +1,17 @@
 import { InjectModel } from "@nestjs/mongoose";
-import { Post } from "./schemas/posts.schema";
+import { Post } from "./schemas/create-posts.schema";
 import { Model, Types } from "mongoose";
+import { PostStatusHistory } from "./schemas/status-history.schema";
+import { PostStatus_Stage1, PostStatus_Stage2 } from "./schemas/post-status";
+import { Category } from "./schemas/categories.schema";
 
 export class PostsDb {
     constructor(
         @InjectModel(Post.name)
-        private readonly postModel: Model<Post>
+        private readonly postModel: Model<Post>,
+
+        @InjectModel(PostStatusHistory.name)
+        private readonly postStatusHistoryModel: Model<PostStatusHistory>
     ) { }
 
     create = async (request) => {
@@ -20,6 +26,21 @@ export class PostsDb {
         )
     }
 
+    updateStatus = async (_id, status) => {
+        return await this.postModel.findByIdAndUpdate(
+            _id,
+            { $set: { status } },
+            { new: true },
+        )
+    }
+
+    createStatusHistory = async (_id, request) => {
+        return await this.postStatusHistoryModel.create({
+            postId: new Types.ObjectId(_id),
+            ...request
+        });
+    }
+
     findOne = async (_id) => {
         if (!Types.ObjectId.isValid(_id)) {
             return null;
@@ -27,17 +48,37 @@ export class PostsDb {
         return await this.postModel.findById(_id)
     }
 
-    find = async (skip, limit) => {
-        return await this.postModel
-            .find()
-            .select('-htmlSource -jsonSource')
+    find = async (skip, limit, categoryId, token) => {
+        const filter = this.filter(token, categoryId)
+        let select = token
+            ? '-region -createdAt -htmlSource -jsonSource'
+            : '_id title developer location cover_picture'
+
+        let query = this.postModel
+            .find(filter)
+            .select(select)
             .skip(skip)
             .limit(limit)
             .sort({ createdAt: -1 })
-            .lean()
+
+        if (token)
+            query = query.populate('category', 'name')
+
+        return await query.lean()
     }
 
-    count = async () => {
-        return await this.postModel.countDocuments()
+    count = async (token, categoryId) => {
+        const filter = this.filter(token, categoryId)
+        return await this.postModel.countDocuments(filter)
+    }
+
+    /*==========================
+        HELPER FUNCTIONS
+    ============================*/
+    private filter = (token, categoryId) => {
+        return {
+            categoryId,
+            ...(token ? { status: { $ne: PostStatus_Stage1.DRAFT } } : { status: PostStatus_Stage2.PUBLISHED })
+        }
     }
 }

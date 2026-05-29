@@ -9,12 +9,12 @@ const getTokenFromCookies = async (req, type = 'refresh') => {
                 : req.cookies?.refresh_token ?? null;
 
         if (!token)
-            throw new UnauthorizedException('Thiếu refresh token để xác thực.');
+            throw new UnauthorizedException('Thiếu token để xác thực.');
         return token
     } catch (error) {
         if (error instanceof Error && error.name === 'TokenExpiredError')
             throw new UnauthorizedException('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.');
-        throw new UnauthorizedException('Refresh token không hợp lệ.')
+        throw new UnauthorizedException('Token không hợp lệ.')
     }
 }
 

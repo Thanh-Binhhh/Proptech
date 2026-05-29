@@ -94,7 +94,6 @@ export class ContactService {
     }
   }
 
-
   find = async (page) => {
     const limit = 12
     const skip = (page - 1) * limit

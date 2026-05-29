@@ -1,11 +1,12 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { POSTS_PATTERNS } from '@app/contracts/posts/books.patterns';
+import { POSTS_PATTERNS } from '@app/contracts/posts/posts.patterns';
 import { CATEGORIES_PATTERNS } from '@app/contracts/posts/categories.patterns';
-import { CreatePostDto } from '@app/contracts/posts/post.dto';
+import { CreatePostDto } from '@app/contracts/posts/create-post.dto';
 import { CreateCategoryDto } from '@app/contracts/posts/category.dto';
 import { PostsService } from './posts.service';
 import { CategoriesService } from './categories/categories.service';
+import { UpdateStatusPostDto } from '@app/contracts/posts/update-post-status.dto';
 
 @Controller()
 export class PostsController {
@@ -34,19 +35,30 @@ export class PostsController {
 
   @MessagePattern(POSTS_PATTERNS.CREATE)
   async create(@Payload() payload: {
+    accessToken: string,
     request: CreatePostDto,
     coverPicture: Express.Multer.File
   }) {
-    return await this.postsService.create(payload.request, payload.coverPicture);
+    return await this.postsService.create(payload);
   }
 
   @MessagePattern(POSTS_PATTERNS.UPDATE)
   async update(@Payload() payload: {
+    accessToken: string,
     _id: string,
     request: CreatePostDto,
     coverPicture: Express.Multer.File
   }) {
-    return await this.postsService.update(payload._id, payload.request, payload.coverPicture);
+    return await this.postsService.update(payload);
+  }
+
+  @MessagePattern(POSTS_PATTERNS.UPDATE_STATUS)
+  async updateStatus(@Payload() payload: {
+    accessToken: string,
+    _id: string,
+    request: UpdateStatusPostDto,
+  }) {
+    return await this.postsService.updateStatus(payload);
   }
 
   @MessagePattern(POSTS_PATTERNS.FIND_ONE)
@@ -60,7 +72,11 @@ export class PostsController {
   }
 
   @MessagePattern(POSTS_PATTERNS.FIND)
-  async find(@Payload() request: number) {
-    return await this.postsService.find(request)
+  async find(@Payload() payload: {
+    accessToken: string,
+    page: number,
+    categoryId: string
+  }) {
+    return await this.postsService.find(payload)
   }
 }
