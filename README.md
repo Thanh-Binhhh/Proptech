@@ -70,14 +70,14 @@ AHM-Proptech
 | HTTP Method | Endpoint                       | Mô tả                                                            |
 | :---------- | :----------------------------- | :--------------------------------------------------------------- |
 | `POST`      | `/auth/register`               | Tạo tài khoản mới được phép truy cập vào hệ thống.               |
-| `POST`      | `/auth/resend`                 | Gửi lại email xác nhận cho tài khoản vừa được tạo.               |
 | `POST`      | `/auth/setup`                  | Thiết lập mật khẩu đăng nhập cho tài khoản mới.                  |
+| `POST`      | `/auth/resend`                 | Gửi lại email xác nhận cho tài khoản vừa được tạo.               |
 | `POST`      | `/auth/login`                  | Đăng nhập.                                                       |
-| `GET`       | `/auth/me`                     | Lấy thông tin tài khoản đang đăng nhập.                          |
 | `POST`      | `/auth/refresh`                | Làm mới token để duy trì phiên đăng nhập.                        |
+| `GET`       | `/auth/me`                     | Lấy thông tin tài khoản đang đăng nhập.                          |
 | `POST`      | `/auth/logout`                 | Đăng xuất.                                                       |
 | `POST`      | `/auth/request-reset-password` | Gửi email yêu cầu đặt lại mật khẩu khi người dùng quên mật khẩu. |
-| `POST`      | `/auth/reset-password`         | Cập nhật mật khẩu mới khi người dùng quên mật khẩu.              |
+| `PUT`       | `/auth/reset-password`         | Cập nhật mật khẩu mới khi người dùng quên mật khẩu.              |
 | `GET`       | `/auth`                        | Truy xuất danh sách tài khoản trên hệ thống.                     |
 
 #### 2. Contact Service
@@ -91,12 +91,16 @@ AHM-Proptech
 
 #### 3. Posts Service
 
-| HTTP Method | Endpoint     | Mô tả                       |
-| :---------- | :----------- | :-------------------------- |
-| `POST`      | `/posts`     | Tạo một bài đăng mới.       |
-| `POST`      | `/posts/:id` | Cập nhật bài đăng.          |
-| `GET`       | `/posts`     | Lấy danh sách các bài đăng. |
-| `GET`       | `/posts/:id` | Lấy chi tiết một bài đăng.  |
+| HTTP Method | Endpoint                | Mô tả                             |
+| :---------- | :---------------------- | :-------------------------------- |
+| `POST`      | `/posts/categories`     | Tạo một phân loại bài đăng mới.   |
+| `GET`       | `/posts/categories`     | Lấy danh sách phân loại bài đăng. |
+| `PUT`       | `/posts/categories/:id` | Cập nhật phân loại bài đăng.      |
+| `POST`      | `/posts`                | Tạo một bài đăng mới.             |
+| `PATCH`     | `/posts/:id`            | Cập nhật bài đăng.                |
+| `GET`       | `/posts`                | Lấy danh sách các bài đăng.       |
+| `GET`       | `/posts/:id`            | Lấy chi tiết một bài đăng.        |
+| `PATCH`     | `/posts/status/:id`     | Cập nhật trạng thái bài đăng.     |
 
 ---
 
@@ -121,7 +125,7 @@ Mỗi dịch vụ trong dự án cần có file cấu hình môi trường riên
 ### 4. Khởi động dự án
 
 ```bash
-# Khởi động lần đầu hoặc muốn cập nhật config/setup lại từ đầu
+# Khởi động lần đầu hoặc muốn cập nhật config, setup lại từ đầu
 docker compose up --build -d
 ```
 
@@ -141,6 +145,35 @@ docker-compose start
 # Dừng tất cả dịch vụ, và xóa network + container + volumes.
 docker-compose down -v
 ```
+
+---
+
+## Chạy ở chế độ Gỡ lỗi
+
+### 1. Tại thư mục gốc của dự án
+
+- Thêm tập tin `launch.json` vào thư mục `.vscode/`
+- Thêm tập tin `docker-compose.debug.yml` để ghi đè command và port phục vụ cho quá trình gỡ lỗi.
+- Thêm command
+
+```
+"docker:debug": "docker compose -f docker-compose.yml -f docker-compose.debug.yml up --build",
+```
+
+vào `scripts` tại `package.json`
+
+### 2. Khởi động dự án
+
+```bash
+npm run docker:debug
+```
+
+### 3. Tại Visual Studio Code
+
+- Chọn Run and Debug.
+- Chọn container muốn gắn vào để gỡ lỗi.
+- Đặt breakpoint
+- Chọn Start Debugging.
 
 ---
 
