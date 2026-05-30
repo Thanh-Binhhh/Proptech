@@ -55,7 +55,6 @@ export class AuthService {
         } catch (error) {
             handleMicroserviceError(error);
         }
-
     }
 
     refresh = async (req, res) => {
@@ -83,6 +82,18 @@ export class AuthService {
             return response
         } catch (error) {
             handleMicroserviceError(error)
+        }
+    }
+
+    logout = async (req, res) => {
+        try {
+            const refreshToken = await getTokenFromCookies(req)
+            await this.authService.send(AUTH_PATTERNS.LOGOUT, refreshToken)
+            await this.clearTokens(res)
+
+            return { message: "Đăng xuất thành công." }
+        } catch (error) {
+            handleMicroserviceError(error);
         }
     }
 
@@ -130,6 +141,20 @@ export class AuthService {
             secure: true,
             sameSite: 'none',
             maxAge: 24 * 60 * 60 * 1000, // 1d
+        })
+    }
+
+    private clearTokens = async (res) => {
+        res.clearCookie('access_token', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
+        })
+
+        res.clearCookie('refresh_token', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
         })
     }
 }

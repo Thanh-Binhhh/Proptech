@@ -50,4 +50,8 @@ export class AuthDb {
             refreshToken: request
         })
     }
+
+    deleteRefreshToken = async (refreshToken) => {
+        return await this.refreshTokenModel.deleteOne({ refreshToken })
+    }
 }

@@ -5,6 +5,7 @@ export const AUTH_PATTERNS = {
     LOGIN: 'login',
     REFRESH_TOKEN: 'refresh-token',
     ME: 'get-me',
+    LOGOUT: 'logout',
     REQUEST_RESET_PASSWORD: 'request-reset-password',
     RESET_PASSWORD: 'reset-password',
     FIND: 'find',

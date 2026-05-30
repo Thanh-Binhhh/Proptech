@@ -55,7 +55,7 @@ export class AuthController {
     @Public()
     @Post('refresh')
     async refreshTokens(
-        @Req() req: any,
+        @Req() req: Request,
         @Res({ passthrough: true }) res: Response
     ) {
         return await this.authService.refresh(req, res)
@@ -66,7 +66,12 @@ export class AuthController {
         return await this.authService.getMe(req)
     }
 
-    // TODO: Đăng xuất
+    @Post('logout')
+    async logOut(
+        @Req() req: Request,
+        @Res({ passthrough: true }) res: Response) {
+        return await this.authService.logout(req, res)
+    }
 
     @Public()
     @Post('request-reset-password')

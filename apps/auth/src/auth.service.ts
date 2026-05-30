@@ -198,7 +198,15 @@ export class AuthService {
                 status
             }
         }
+    }
 
+    logOut = async (token) => {
+        if (token)
+            await this.authDb.deleteRefreshToken(token)
+
+        return {
+            message: 'Đã xóa refresh token trong Cookie.',
+        }
     }
 
     /*==========================
