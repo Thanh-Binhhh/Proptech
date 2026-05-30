@@ -154,13 +154,11 @@ docker-compose down -v
 
 - Thêm tập tin `launch.json` vào thư mục `.vscode/`
 - Thêm tập tin `docker-compose.debug.yml` để ghi đè command và port phục vụ cho quá trình gỡ lỗi.
-- Thêm command
+- Thêm vào `scripts` tại `package.json`
 
 ```
 "docker:debug": "docker compose -f docker-compose.yml -f docker-compose.debug.yml up --build",
 ```
-
-vào `scripts` tại `package.json`
 
 ### 2. Khởi động dự án
 
