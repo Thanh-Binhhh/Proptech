@@ -217,12 +217,13 @@ export class PostsService {
     const totalPosts = await this.postsDb.count(accessToken, categoryId)
     const totalPages = Math.ceil(totalPosts / limit)
 
+    if (totalPosts === 0)
+      return { message: 'Chưa có bài đăng nào' }
+
     if (page > totalPages)
       return throwRpcException(409, "Số trang vượt quá giới hạn.")
 
     const response = await this.postsDb.find(skip, limit, categoryId, accessToken)
-    if (!response.length)
-      return { message: 'Chưa có bài đăng nào' }
 
     // Get set of employees from Auth service (if exist)
     let data
