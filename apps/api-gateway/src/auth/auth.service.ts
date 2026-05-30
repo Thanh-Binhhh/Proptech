@@ -49,7 +49,6 @@ export class AuthService {
                 this.authService.send(AUTH_PATTERNS.LOGIN, request)
             );
             const { message, tokens, data } = response
-
             await this.setTokens(tokens, res)
             return { message, data }
         } catch (error) {
@@ -77,7 +76,7 @@ export class AuthService {
         try {
             const accessToken = await getTokenFromCookies(req, 'access')
             const response = await firstValueFrom(
-                this.authService.send(AUTH_PATTERNS.ME, { accessToken })
+                this.authService.send(AUTH_PATTERNS.ME, accessToken)
             )
             return response
         } catch (error) {
@@ -90,7 +89,6 @@ export class AuthService {
             const refreshToken = await getTokenFromCookies(req)
             await this.authService.send(AUTH_PATTERNS.LOGOUT, refreshToken)
             await this.clearTokens(res)
-
             return { message: "Đăng xuất thành công." }
         } catch (error) {
             handleMicroserviceError(error);

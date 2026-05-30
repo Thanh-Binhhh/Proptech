@@ -45,20 +45,21 @@ export class AuthController {
 
   @MessagePattern(AUTH_PATTERNS.REFRESH_TOKEN)
   async refreshTokens(
-    @Payload() request: string) {
+    @Payload() request: string
+  ) {
     return await this.authService.refreshTokens(request)
   }
 
   @MessagePattern(AUTH_PATTERNS.ME)
   async getMe(
-    @Payload() payload: {
-      accessToken?: string
-    }) {
-    return await this.authService.getMe(payload.accessToken)
+    @Payload() request: string) {
+    return await this.authService.getMe(request)
   }
 
   @MessagePattern(AUTH_PATTERNS.LOGOUT)
-  async logOut(@Payload() request: string) {
+  async logOut(
+    @Payload() request: string
+  ) {
     return await this.authService.logOut(request)
   }
 

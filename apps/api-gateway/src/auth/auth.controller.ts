@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '../guards/auth.guard';
 import { Public } from '../guards/decorator/public.decorater';
@@ -48,7 +48,8 @@ export class AuthController {
     @Post('login')
     async logIn(
         @Body() request: LogInDto,
-        @Res({ passthrough: true }) res: Response) {
+        @Res({ passthrough: true }) res: Response
+    ) {
         return await this.authService.login(request, res)
     }
 
@@ -62,14 +63,17 @@ export class AuthController {
     }
 
     @Get('me')
-    async getMe(@Req() req: any) {
+    async getMe(
+        @Req() req: any
+    ) {
         return await this.authService.getMe(req)
     }
 
     @Post('logout')
     async logOut(
         @Req() req: Request,
-        @Res({ passthrough: true }) res: Response) {
+        @Res({ passthrough: true }) res: Response
+    ) {
         return await this.authService.logout(req, res)
     }
 
@@ -82,7 +86,7 @@ export class AuthController {
     }
 
     @Public()
-    @Post('reset-password')
+    @Put('reset-password')
     async resetPassword(
         @Req() req: Request,
         @Body() request: SetupPasswordDto

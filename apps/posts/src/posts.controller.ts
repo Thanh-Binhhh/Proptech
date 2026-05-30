@@ -16,15 +16,18 @@ export class PostsController {
   ) { }
 
   @MessagePattern(CATEGORIES_PATTERNS.CREATE)
-  async createCategory(@Payload() request: CreateCategoryDto) {
+  async createCategory(
+    @Payload() request: CreateCategoryDto
+  ) {
     return await this.categoriesService.create(request);
   }
 
   @MessagePattern(CATEGORIES_PATTERNS.UPDATE)
-  async editCategory(@Payload() payload: {
-    _id: string,
-    request: CreatePostDto,
-  }) {
+  async editCategory(
+    @Payload() payload: {
+      _id: string,
+      request: CreatePostDto,
+    }) {
     return await this.categoriesService.edit(payload._id, payload.request);
   }
 
@@ -34,54 +37,60 @@ export class PostsController {
   }
 
   @MessagePattern(POSTS_PATTERNS.CREATE)
-  async create(@Payload() payload: {
-    accessToken: string,
-    request: CreatePostDto,
-    coverPicture: Express.Multer.File
-  }) {
+  async create(
+    @Payload() payload: {
+      accessToken: string,
+      request: CreatePostDto,
+      coverPicture: Express.Multer.File
+    }) {
     return await this.postsService.create(payload);
   }
 
   @MessagePattern(POSTS_PATTERNS.UPDATE)
-  async update(@Payload() payload: {
-    accessToken: string,
-    _id: string,
-    request: CreatePostDto,
-    coverPicture: Express.Multer.File
-  }) {
+  async update(
+    @Payload() payload: {
+      accessToken: string,
+      _id: string,
+      request: CreatePostDto,
+      coverPicture: Express.Multer.File
+    }) {
     return await this.postsService.update(payload);
   }
 
   @MessagePattern(POSTS_PATTERNS.UPDATE_STATUS)
-  async updateStatus(@Payload() payload: {
-    accessToken: string,
-    _id: string,
-    request: UpdateStatusPostDto,
-  }) {
+  async updateStatus(
+    @Payload() payload: {
+      accessToken: string,
+      _id: string,
+      request: UpdateStatusPostDto,
+    }) {
     return await this.postsService.updateStatus(payload);
   }
 
   @MessagePattern(POSTS_PATTERNS.FIND_ONE)
-  async findOne(@Payload() payload: {
-    accessToken: string,
-    _id: string
-  }) {
+  async findOne(
+    @Payload() payload: {
+      accessToken: string,
+      _id: string
+    }) {
     return await this.postsService.findOne(payload)
   }
 
   @MessagePattern(POSTS_PATTERNS.FIND_ONE_FOR_CONTACT)
-  async findOneForContactService(@Payload() payload: {
-    _id: string
-  }) {
+  async findOneForContactService(
+    @Payload() payload: {
+      _id: string
+    }) {
     return await this.postsService.findOneForContactService(payload)
   }
 
   @MessagePattern(POSTS_PATTERNS.FIND)
-  async find(@Payload() payload: {
-    accessToken: string,
-    page: number,
-    categoryId: string
-  }) {
+  async find(
+    @Payload() payload: {
+      accessToken: string,
+      page: number,
+      categoryId: string
+    }) {
     return await this.postsService.find(payload)
   }
 }

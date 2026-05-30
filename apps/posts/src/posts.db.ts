@@ -42,13 +42,11 @@ export class PostsDb {
     }
 
     findOne = async (token, _id) => {
-        let select = token
-            ? ''
-            : '-authorId'
+        let select = token ? '' : '-authorId'
 
-        if (!Types.ObjectId.isValid(_id)) {
+        if (!Types.ObjectId.isValid(_id))
             return null;
-        }
+
         return await this.postModel
             .findById(_id)
             .select(select)

@@ -9,7 +9,9 @@ export class ContactController {
   constructor(private readonly contactService: ContactService) { }
 
   @MessagePattern(CONTACTS_PATTERNS.CREATE)
-  async create(@Payload() payload) {
+  async create(
+    @Payload() payload
+  ) {
     return await this.contactService.create(payload)
   }
 
@@ -23,12 +25,16 @@ export class ContactController {
   }
 
   @MessagePattern(CONTACTS_PATTERNS.FIND_ONE)
-  async findOne(@Payload() request) {
+  async findOne(
+    @Payload() request
+  ) {
     return await this.contactService.findOne(request)
   }
 
   @MessagePattern(CONTACTS_PATTERNS.FIND)
-  async find(@Payload() request: number) {
+  async find(
+    @Payload() request: number
+  ) {
     return await this.contactService.find(request)
   }
 }

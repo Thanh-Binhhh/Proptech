@@ -147,7 +147,6 @@ export class PostsService {
 
       const oldPost = await this.findOne({ _id })
       const oldStatus = oldPost.data.status
-
       const actionBy = await this.extractUserFromToken(accessToken)
       const { message, response } = await this.handleStatusTransition(_id, oldStatus, request, actionBy.sub)
 

@@ -33,10 +33,10 @@ export class CategoriesService {
   find = async () => {
     const response = await this.categoriesDb.find()
     if (!response)
-      return { message: 'Chưa có danh mục nào' }
+      return { message: 'Chưa có danh mục nào.' }
 
     return {
-      message: 'Lấy danh sách danh mục thành công',
+      message: 'Lấy danh sách danh mục thành công.',
       data: response
     }
   }

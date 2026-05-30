@@ -12,7 +12,9 @@ export class ContactController {
 
   @Public()
   @Post()
-  async create(@Body() request: CreateContactDto) {
+  async create(
+    @Body() request: CreateContactDto
+  ) {
     return await this.contactService.create(request);
   }
 
@@ -26,7 +28,9 @@ export class ContactController {
   }
 
   @Get(':_id')
-  async findOne(@Param('_id') _id: string) {
+  async findOne(
+    @Param('_id') _id: string
+  ) {
     return await this.contactService.findOne(_id);
   }
 

@@ -21,9 +21,8 @@ export class CategoriesDb {
     }
 
     findOne = async (_id) => {
-        if (!Types.ObjectId.isValid(_id)) {
+        if (!Types.ObjectId.isValid(_id))
             return null;
-        }
 
         return await this.categoryModel.findById(_id)
     }
