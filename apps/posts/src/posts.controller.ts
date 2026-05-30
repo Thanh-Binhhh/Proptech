@@ -70,8 +70,10 @@ export class PostsController {
   }
 
   @MessagePattern(POSTS_PATTERNS.FIND_ONE_FOR_CONTACT)
-  async findOneForContactService(@Payload() request: string) {
-    return await this.postsService.findOneForContactService(request)
+  async findOneForContactService(@Payload() payload: {
+    _id: string
+  }) {
+    return await this.postsService.findOneForContactService(payload)
   }
 
   @MessagePattern(POSTS_PATTERNS.FIND)

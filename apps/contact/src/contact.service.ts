@@ -25,10 +25,11 @@ export class ContactService {
       CU CONTACTS
   ============================*/
   create = async (request) => {
-    if (request.propertyId) {
+    if (request.postId) {
       try {
+        const _id = request.postId
         await firstValueFrom(
-          this.postService.send(POSTS_PATTERNS.FIND_ONE, request.propertyId),
+          this.postService.send(POSTS_PATTERNS.FIND_ONE, { _id }),
         );
       } catch (error: any) {
         throwRpcException(error!.statusCode, error?.message,);
@@ -43,19 +44,18 @@ export class ContactService {
     }
   }
 
-  update = async (request) => {
-    const { accessToken, _id, status } = request
-    await this.findOne(_id)
+  update = async (payload) => {
+    const { accessToken, _id, request } = payload
+    let response = await this.findOne(_id)
 
-    const payload = await this.jwtService.verifyAsync(
+    const resolver = await this.jwtService.verifyAsync(
       accessToken, {
       secret: process.env.SECRET_KEY
     })
-
-    const response = await this.contactDb.update(_id, status, payload.sub)
+    response = await this.contactDb.update(_id, request.status, resolver.sub)
 
     return {
-      message: 'Cập nhật trang thái yêu cầu tư vấn thành công',
+      message: 'Cập nhật trạng thái yêu cầu tư vấn thành công',
       data: response
     }
   }
@@ -64,33 +64,15 @@ export class ContactService {
       QUERY CONTACTS
   ============================*/
   findOne = async (_id) => {
-    let property
-    let employee
-
     const response = await this.contactDb.findOne(_id)
     if (!response)
-      return throwRpcException(404, 'Không tìm thấy yêu cầu tư vấn tương ứng')
+      return throwRpcException(404, 'Không tìm thấy yêu cầu tư vấn tương ứng.')
 
-    if (response.propertyId) {
-      property = await firstValueFrom(
-        this.postService.send(POSTS_PATTERNS.FIND_ONE_FOR_CONTACT, response.propertyId),
-      );
-    }
-
-    if (response.employeeId) {
-      employee = await firstValueFrom(
-        this.authService.send(AUTH_PATTERNS.FIND_ONE, response.employeeId),
-      );
-    }
+    const [data] = await this.getContactsDetail([response]);
 
     return {
-      message: 'Lấy thông tin yêu cầu tư vấn thành công',
-      data: {
-        response,
-        property,
-        employee
-      }
-
+      message: 'Lấy thông tin chi tiết yêu cầu tư vấn thành công.',
+      data
     }
   }
 
@@ -98,78 +80,72 @@ export class ContactService {
     const limit = 12
     const skip = (page - 1) * limit
 
-    const total = await this.contactDb.count()
-    const totalPages = Math.ceil(total / limit)
-    if (page > totalPages)
-      return throwRpcException(409, "Tham số truy vấn không hợp lệ")
-
-    const response = await this.contactDb.find(skip, limit);
-    if (!response) {
+    const totalMessages = await this.contactDb.count()
+    if (totalMessages === 0) {
       return {
         message: 'Khách hàng chưa gửi yêu cầu nào.',
       };
     }
 
-    // Get set of propertyId and set of employeeId from contact
-    const propertyIds = [
-      ...new Set(
-        response
-          .map((contact) => contact.propertyId?.toString())
-          .filter(Boolean),
-      ),
-    ];
+    const totalPages = Math.ceil(totalMessages / limit)
+    if (page > totalPages)
+      return throwRpcException(409, "Tham số truy vấn không hợp lệ")
 
-    const employeeIds = [
-      ...new Set(
-        response
-          .map((contact) => contact.employeeId?.toString())
-          .filter(Boolean),
-      ),
-    ];
+    const response = await this.contactDb.find(skip, limit);
 
-    // Get details posts and employees from posts and auth services
-    const [propertyMap, employeeMap] = await Promise.all([
-      buildMap(
-        propertyIds,
-        POSTS_PATTERNS.FIND_ONE_FOR_CONTACT,
-        this.postService,
-      ),
-
-      buildMap(
-        employeeIds,
-        AUTH_PATTERNS.FIND_ONE,
-        this.authService,
-      ),
-    ]);
-
-    const data = response.map((contact) => {
-      const propertyId = contact.propertyId?.toString();
-      const employeeId = contact.employeeId?.toString();
-      const property = propertyId ? propertyMap.get(propertyId) : null;
-      const employee = employeeId ? employeeMap.get(employeeId) : null;
-
-      return {
-        ...contact,
-        ...(property ? { property } : {}),
-        ...(employee ? { employee } : {}),
-      };
-    });
-
-    const { propertyId, employeeId, ...res } = data
+    // Get set of postId and set of employeeId from contact
+    const data = await this.getContactsDetail(response)
 
     return {
       message: 'Lấy danh sách yêu cầu tư vấn từ khách hàng thành công',
       pagination: {
         page,
         limit,
+        totalMessages,
         totalPages,
       },
-      data: res,
+      data
     };
   };
 
   /*==========================
       HELPER FUNCTIONS
   ============================*/
+  private getContactsDetail = async (response) => {
+    const resolverIds: string[] = [
+      ...new Set(
+        response
+          .map((contact) => contact.resolvedBy?.toString())
+          .filter((id): id is string => Boolean(id)),
+      ),
+    ];
 
+    const postIds: string[] = [
+      ...new Set(
+        response
+          .map((contact) => contact.post?.toString())
+          .filter((id): id is string => Boolean(id)),
+      ),
+    ];
+
+    const [resolverMap, postMap] = await Promise.all([
+      buildMap(
+        resolverIds,
+        AUTH_PATTERNS.FIND_ONE,
+        this.authService,
+      ),
+
+      buildMap(
+        postIds,
+        POSTS_PATTERNS.FIND_ONE_FOR_CONTACT,
+        this.postService,
+      ),
+    ]);
+
+    return response.map((contact) => ({
+      ...contact,
+      post: postMap.get(contact.post?.toString()),
+      resolvedBy: resolverMap.get(contact.resolvedBy?.toString())
+    }));
+  };
 }

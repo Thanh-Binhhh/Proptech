@@ -39,7 +39,7 @@ const buildMap = async (
     service: any,
 ) => {
     const results = await Promise.allSettled(
-        ids.map((id) => firstValueFrom(service.send(pattern, id))),
+        ids.map((_id) => firstValueFrom(service.send(pattern, { _id }))),
     );
 
     return results.reduce((map, result) => {

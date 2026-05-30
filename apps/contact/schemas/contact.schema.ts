@@ -40,10 +40,10 @@ export class Message {
     status!: MessageStatus;
 
     @Prop({})
-    propertyId!: string
+    postId!: string
 
     @Prop({})
-    employeeId!: string
+    resolvedBy!: string
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message)

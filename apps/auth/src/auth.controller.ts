@@ -80,7 +80,9 @@ export class AuthController {
   }
 
   @MessagePattern(AUTH_PATTERNS.FIND_ONE)
-  async findOneForContactService(@Payload() request) {
-    return await this.authService.findOne(request)
+  async findOneForContactService(@Payload() payload: {
+    _id: string
+  }) {
+    return await this.authService.findOne(payload)
   }
 }

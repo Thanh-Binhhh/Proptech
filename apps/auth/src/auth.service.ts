@@ -212,12 +212,14 @@ export class AuthService {
         }
     }
 
-    findOne = async (_id) => {
+    findOne = async (payload) => {
+        const { _id } = payload
         const response = await this.authDb.findById(_id)
 
         return {
             _id: response!._id,
             name: response!.name,
+
         }
     }
 

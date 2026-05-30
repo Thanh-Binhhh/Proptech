@@ -200,8 +200,8 @@ export class PostsService {
     }
   }
 
-  findOneForContactService = async (_id) => {
-    const response = await this.findOne(_id)
+  findOneForContactService = async (payload) => {
+    const response = await this.findOne(payload)
 
     return {
       _id: response.data!._id,

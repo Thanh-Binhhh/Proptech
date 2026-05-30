@@ -14,14 +14,11 @@ export class ContactDb {
         return await this.messageModel.create(request)
     }
 
-    update = async (_id: string, status, employeeId) => {
+    update = async (_id: string, status, resolvedBy) => {
         return await this.messageModel.findByIdAndUpdate(
             _id,
-            { status, employeeId },
-            {
-                new: true,
-                runValidators: true,
-            },
+            { status, resolvedBy },
+            { returnDocument: 'after' }
         );
     };
 
@@ -29,7 +26,7 @@ export class ContactDb {
         if (!Types.ObjectId.isValid(_id)) {
             return null;
         }
-        return await this.messageModel.findById(_id)
+        return await this.messageModel.findById(_id).lean()
     }
 
     findByEmployee = async (employeeId) => {
