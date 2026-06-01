@@ -114,7 +114,7 @@ export class PostsService {
 
       // Format the response
       const author = await firstValueFrom(
-        this.authService.send(AUTH_PATTERNS.FIND_ONE, response.authorId),
+        this.authService.send(AUTH_PATTERNS.FIND_ONE, { _id: response.authorId }),
       );
 
       const { authorId, ...rest } = response.toObject()
@@ -151,7 +151,7 @@ export class PostsService {
       const { message, response } = await this.handleStatusTransition(_id, oldStatus, request, actionBy.sub)
 
       const employee = await firstValueFrom(
-        this.authService.send(AUTH_PATTERNS.FIND_ONE, response.actionBy),
+        this.authService.send(AUTH_PATTERNS.FIND_ONE, { _id: response.actionBy }),
       );
 
       response.actionBy = employee
@@ -185,7 +185,7 @@ export class PostsService {
     let author
     if (accessToken) {
       author = await firstValueFrom(
-        this.authService.send(AUTH_PATTERNS.FIND_ONE, response.authorId),
+        this.authService.send(AUTH_PATTERNS.FIND_ONE, { _id: response.authorId }),
       );
     }
 
