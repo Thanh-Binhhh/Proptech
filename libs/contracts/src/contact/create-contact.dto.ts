@@ -7,7 +7,7 @@ import {
 export class CreateContactDto {
     @IsString()
     @IsOptional()
-    postId!: string
+    post!: string
 
     @IsString()
     @IsNotEmpty()

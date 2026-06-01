@@ -40,7 +40,7 @@ export class Message {
     status!: MessageStatus;
 
     @Prop({})
-    postId!: string
+    post!: string
 
     @Prop({})
     resolvedBy!: string
