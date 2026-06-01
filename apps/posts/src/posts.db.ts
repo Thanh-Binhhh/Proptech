@@ -83,7 +83,8 @@ export class PostsDb {
     private filter = (token, category) => {
         return {
             category,
-            ...(token ? { status: { $ne: PostStatus_Stage1.DRAFT } } : { status: PostStatus_Stage2.PUBLISHED })
+            ...(token ? {} : { status: PostStatus_Stage2.PUBLISHED })
+            // status: { $ne: PostStatus_Stage1.DRAFT }
         }
     }
 }
