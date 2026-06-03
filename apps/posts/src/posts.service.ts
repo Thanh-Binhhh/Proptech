@@ -199,8 +199,34 @@ export class PostsService {
     }
   }
 
-  findByStatus = async (request) => {
-    return
+  findByStatus = async (payload) => {
+    const { page, status } = payload
+    const limit = 12
+    const skip = (page - 1) * limit
+
+    const totalPosts = await this.postsDb.countByStatus(status)
+    if (totalPosts === 0)
+      return { message: 'Chưa có bài đăng nào tương ứng với trạng thái này.' }
+
+    const totalPages = Math.ceil(totalPosts / limit)
+    if (page > totalPages)
+      return throwRpcException(409, "Số trang vượt quá giới hạn.")
+
+    const response = await this.postsDb.findByStatus(skip, limit, status)
+    const posts = await this.getAuthors(response)
+
+    return {
+      message: 'Lấy danh sách bài đăng theo trạng thái thành công.',
+      pagination: {
+        page,
+        limit,
+        totalPosts,
+        totalPages,
+      },
+      data: {
+        posts
+      }
+    }
   }
 
   findOneForContactService = async (payload) => {

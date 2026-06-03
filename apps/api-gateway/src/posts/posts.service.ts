@@ -78,9 +78,9 @@ export class PostsService {
     }
   }
 
-  findStatus = async (status) => {
+  findByStatus = async (page, status) => {
     try {
-      return await this.postsClient.send(POSTS_PATTERNS.FIND_BY_STATUS, status);
+      return await this.postsClient.send(POSTS_PATTERNS.FIND_BY_STATUS, { page, status });
     } catch (error) {
       handleMicroserviceError(error)
     }

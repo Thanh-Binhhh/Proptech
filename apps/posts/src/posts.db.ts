@@ -53,6 +53,17 @@ export class PostsDb {
             .populate('category', 'name')
     }
 
+    findByStatus = async (skip, limit, status) => {
+        return await this.postModel
+            .find({ status })
+            .select('-region -createdAt -htmlSource -jsonSource')
+            .skip(skip)
+            .limit(limit)
+            .populate('category', 'name')
+            .sort({ createdAt: -1 })
+            .lean()
+    }
+
     find = async (skip, limit, categoryId, token) => {
         const filter = this.filter(token, categoryId)
         let select = token
@@ -76,6 +87,10 @@ export class PostsDb {
         const filter = this.filter(token, categoryId)
         return await this.postModel.countDocuments(filter)
     }
+
+    countByStatus = async (status) => {
+        return await this.postModel.countDocuments({ status });
+    };
 
     countAllStatus = async () => {
         const response = await this.postModel.aggregate([

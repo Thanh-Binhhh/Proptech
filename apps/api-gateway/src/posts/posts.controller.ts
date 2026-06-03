@@ -77,11 +77,12 @@ export class PostsController {
     return this.postsService.findOne(req, _id);
   }
 
-  @Get(':status')
+  @Get()
   async findByStatus(
-    @Param('status') status: string
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('status') status: string
   ) {
-    return this.postsService.findByStatus(status);
+    return this.postsService.findByStatus(page, status);
   }
 
   @Public()
