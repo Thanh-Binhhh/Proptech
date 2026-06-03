@@ -214,11 +214,13 @@ export class PostsService {
     const limit = 12
     const skip = (page - 1) * limit
 
-    
+    if (!accessToken && !categoryId)
+      throwRpcException(400, "Truy vấn bài đăng cho khách hàng thì cần truyền phân loại.")
+
     const totalPosts = await this.postsDb.count(accessToken, categoryId)
     if (totalPosts === 0)
       return { message: 'Chưa có bài đăng nào' }
-    
+
     const totalPages = Math.ceil(totalPosts / limit)
     if (page > totalPages)
       return throwRpcException(409, "Số trang vượt quá giới hạn.")
