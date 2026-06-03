@@ -76,6 +76,12 @@ export class PostsController {
     return await this.postsService.findOne(payload)
   }
 
+  @MessagePattern(POSTS_PATTERNS.FIND_BY_STATUS)
+  async findByStatus(
+    @Payload() request: string) {
+    return await this.postsService.findByStatus(request)
+  }
+
   @MessagePattern(POSTS_PATTERNS.FIND_ONE_FOR_CONTACT)
   async findOneForContactService(
     @Payload() payload: {

@@ -77,6 +77,13 @@ export class PostsController {
     return this.postsService.findOne(req, _id);
   }
 
+  @Get(':status')
+  async findByStatus(
+    @Param('status') status: string
+  ) {
+    return this.postsService.findByStatus(status);
+  }
+
   @Public()
   @Get()
   async find(

@@ -7,7 +7,6 @@ import { firstValueFrom } from 'rxjs';
 import { AUTH, POSTS } from 'libs/contracts/constant';
 import { POSTS_PATTERNS } from '@app/contracts/posts/posts.patterns';
 import { AUTH_PATTERNS } from '@app/contracts/auth/auth.patterns';
-import { MessageSchema, MessageStatus } from '../schemas/contact.schema';
 
 @Injectable()
 export class ContactService {

@@ -78,6 +78,14 @@ export class PostsService {
     }
   }
 
+  findStatus = async (status) => {
+    try {
+      return await this.postsClient.send(POSTS_PATTERNS.FIND_BY_STATUS, status);
+    } catch (error) {
+      handleMicroserviceError(error)
+    }
+  }
+
   find = async (req, page, categoryId) => {
     try {
       const accessToken = req.cookies?.access_token

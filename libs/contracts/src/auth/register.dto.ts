@@ -1,4 +1,5 @@
 import { Prop } from '@nestjs/mongoose';
+import { AccountRole } from 'apps/auth/src/schemas/register.schema';
 import {
     IsString,
     IsNotEmpty,
@@ -6,11 +7,6 @@ import {
     IsOptional,
     IsEnum,
 } from 'class-validator';
-
-export enum AccountRole {
-    EMPLOYEE = 'Nhân viên',
-    MANAGER = 'Quản lý'
-}
 
 export class RegistrationDto {
     @IsString()

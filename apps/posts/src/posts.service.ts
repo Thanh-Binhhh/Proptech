@@ -199,6 +199,10 @@ export class PostsService {
     }
   }
 
+  findByStatus = async (request) => {
+    return
+  }
+
   findOneForContactService = async (payload) => {
     const response = await this.findOne(payload)
 
