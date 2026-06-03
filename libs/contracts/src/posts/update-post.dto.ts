@@ -1,9 +1,8 @@
 import { Region } from 'apps/posts/src/schemas/create-posts.schema'
-import { PostStatus_Stage1, PostStatusValues } from 'apps/posts/src/schemas/post-status'
+import { PostStatusValues } from 'apps/posts/src/schemas/post-status'
 import {
     IsEnum,
     IsOptional,
-    IsNotEmpty,
     IsString
 } from 'class-validator'
 
@@ -29,7 +28,7 @@ export class UpdatePostDto {
     status?: string
 
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     category?: string
 
     @IsString()

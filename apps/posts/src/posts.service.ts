@@ -7,9 +7,9 @@ import { PostsDb } from './posts.db';
 import { buildMap, throwRpcException } from '@app/contracts/helper-functions';
 import { JwtService } from '@nestjs/jwt';
 import { PostStatus_Stage1, PostStatus_Stage2, PostStatus_Stage3 } from './schemas/post-status';
-import { AccountRole } from '@app/contracts/auth/register.dto';
 import { AUTH } from 'libs/contracts/constant';
 import { AUTH_PATTERNS } from '@app/contracts/auth/auth.patterns';
+import { AccountRole } from 'apps/auth/src/schemas/register.schema';
 
 @Injectable()
 export class PostsService {
