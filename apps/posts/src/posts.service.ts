@@ -233,6 +233,11 @@ export class PostsService {
       delete data.authorId
     }
 
+    // Get posts of each status
+    let status
+    if (accessToken)
+      status = await this.postsDb.countAllStatus()
+
     return {
       message: 'Lấy danh sách bài đăng thành công',
       pagination: {
@@ -241,7 +246,10 @@ export class PostsService {
         totalPosts,
         totalPages,
       },
-      data
+      data: {
+        status,
+        posts: data
+      }
     }
   }
 

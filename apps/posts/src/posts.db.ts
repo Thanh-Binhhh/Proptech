@@ -2,7 +2,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Post } from "./schemas/create-posts.schema";
 import { Model, Types } from "mongoose";
 import { PostStatusHistory } from "./schemas/status-history.schema";
-import { PostStatus_Stage1, PostStatus_Stage2 } from "./schemas/post-status";
+import { PostStatus_Stage1, PostStatus_Stage2, PostStatusValues } from "./schemas/post-status";
 
 export class PostsDb {
     constructor(
@@ -75,6 +75,27 @@ export class PostsDb {
     count = async (token, categoryId) => {
         const filter = this.filter(token, categoryId)
         return await this.postModel.countDocuments(filter)
+    }
+
+    countAllStatus = async () => {
+        const response = await this.postModel.aggregate([
+            {
+                $group: {
+                    _id: '$status',
+                    count: { $sum: 1 }
+                }
+            }
+        ])
+
+        var statusCount = Object.fromEntries(
+            Object.values(PostStatusValues).map(s => [s, 0])
+        )
+
+        response.forEach(s => {
+            statusCount[s._id] = s.count
+        })
+
+        return statusCount
     }
 
     /*==========================
