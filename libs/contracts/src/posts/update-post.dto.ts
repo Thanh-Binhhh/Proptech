@@ -3,6 +3,7 @@ import { PostStatus_Stage1, PostStatusValues } from 'apps/posts/src/schemas/post
 import {
     IsEnum,
     IsOptional,
+    IsNotEmpty,
     IsString
 } from 'class-validator'
 
@@ -28,8 +29,8 @@ export class UpdatePostDto {
     status?: string
 
     @IsString()
-    @IsOptional()
-    categoryId?: string
+    @IsNotEmpty()
+    category?: string
 
     @IsString()
     @IsOptional()
