@@ -77,21 +77,14 @@ export class PostsController {
     return this.postsService.findOne(req, _id);
   }
 
-  @Get()
-  async findByStatus(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('status') status: string
-  ) {
-    return this.postsService.findByStatus(page, status);
-  }
-
   @Public()
   @Get()
   async find(
     @Req() req: Request,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('categoryId') categoryId: string,
+    @Query('status') status: string,
+    @Query('category') category: string,
   ) {
-    return await this.postsService.find(req, page, categoryId)
+    return await this.postsService.find(req, page, status, category)
   }
 }

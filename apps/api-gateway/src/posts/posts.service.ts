@@ -78,18 +78,10 @@ export class PostsService {
     }
   }
 
-  findByStatus = async (page, status) => {
-    try {
-      return await this.postsClient.send(POSTS_PATTERNS.FIND_BY_STATUS, { page, status });
-    } catch (error) {
-      handleMicroserviceError(error)
-    }
-  }
-
-  find = async (req, page, categoryId) => {
+  find = async (req, page, status, category) => {
     try {
       const accessToken = req.cookies?.access_token
-      return await this.postsClient.send(POSTS_PATTERNS.FIND, { accessToken, page, categoryId });
+      return await this.postsClient.send(POSTS_PATTERNS.FIND, { accessToken, page, status, category });
     } catch (error) {
       handleMicroserviceError(error)
     }

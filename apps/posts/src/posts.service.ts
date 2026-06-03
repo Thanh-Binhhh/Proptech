@@ -240,14 +240,14 @@ export class PostsService {
   }
 
   find = async (payload) => {
-    const { accessToken, page, categoryId } = payload
+    const { accessToken, page, status, category } = payload
     const limit = 12
     const skip = (page - 1) * limit
 
-    if (!accessToken && !categoryId)
+    if (!accessToken && !category)
       throwRpcException(400, "Truy vấn bài đăng cho khách hàng thì cần truyền phân loại.")
 
-    const totalPosts = await this.postsDb.count(accessToken, categoryId)
+    const totalPosts = await this.postsDb.count(accessToken, status, category)
     if (totalPosts === 0)
       return { message: 'Chưa có bài đăng nào' }
 
@@ -255,7 +255,7 @@ export class PostsService {
     if (page > totalPages)
       return throwRpcException(409, "Số trang vượt quá giới hạn.")
 
-    const response = await this.postsDb.find(skip, limit, categoryId, accessToken)
+    const response = await this.postsDb.find(skip, limit, status, category, accessToken)
 
     // Get set of employees from Auth service (if exist)
     let data
@@ -267,9 +267,9 @@ export class PostsService {
     }
 
     // Get posts of each status
-    let status
+    let statusNumber
     if (accessToken)
-      status = await this.postsDb.countAllStatus()
+      statusNumber = await this.postsDb.countAllStatus()
 
     return {
       message: 'Lấy danh sách bài đăng thành công',
@@ -280,7 +280,7 @@ export class PostsService {
         totalPages,
       },
       data: {
-        status,
+        status: statusNumber,
         posts: data
       }
     }

@@ -64,8 +64,8 @@ export class PostsDb {
             .lean()
     }
 
-    find = async (skip, limit, categoryId, token) => {
-        const filter = this.filter(token, categoryId)
+    find = async (skip, limit, status, categoryId, token) => {
+        const filter = this.filter(token, status, categoryId)
         let select = token
             ? '-region -createdAt -htmlSource -jsonSource'
             : '_id title developer location cover_picture'
@@ -83,14 +83,10 @@ export class PostsDb {
         return await query.lean()
     }
 
-    count = async (token, categoryId) => {
-        const filter = this.filter(token, categoryId)
+    count = async (token, status, categoryId) => {
+        const filter = this.filter(token, status, categoryId)
         return await this.postModel.countDocuments(filter)
     }
-
-    countByStatus = async (status) => {
-        return await this.postModel.countDocuments({ status });
-    };
 
     countAllStatus = async () => {
         const response = await this.postModel.aggregate([
@@ -116,10 +112,13 @@ export class PostsDb {
     /*==========================
         HELPER FUNCTIONS
     ============================*/
-    private filter = (token, category) => {
+    private filter = (token, status, category) => {
         return {
             ...(category ? { category } : {}),
-            ...(token ? {} : { status: PostStatus_Stage2.PUBLISHED }),
+
+            ...(token ?
+                status ? { status } : {}
+                : { status: PostStatus_Stage2.PUBLISHED }),
         };
     };
 }
