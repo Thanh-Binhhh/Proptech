@@ -7,6 +7,7 @@ import { firstValueFrom } from 'rxjs';
 import { AUTH, POSTS } from 'libs/contracts/constant';
 import { POSTS_PATTERNS } from '@app/contracts/posts/posts.patterns';
 import { AUTH_PATTERNS } from '@app/contracts/auth/auth.patterns';
+import { MessageSchema, MessageStatus } from '../schemas/contact.schema';
 
 @Injectable()
 export class ContactService {
@@ -93,6 +94,9 @@ export class ContactService {
 
     const response = await this.contactDb.find(skip, limit);
 
+    // Count number of contact requests of eachh status
+    const responseStatus = await this.contactDb.countAllStatus()
+
     // Get set of postId and set of employeeId from contact
     const data = await this.getContactsDetail(response)
 
@@ -104,7 +108,10 @@ export class ContactService {
         totalMessages,
         totalPages,
       },
-      data
+      data: {
+        status: responseStatus,
+        contact: data
+      }
     };
   };
 

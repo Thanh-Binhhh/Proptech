@@ -1,5 +1,5 @@
 import { InjectModel } from "@nestjs/mongoose";
-import { Message } from "../schemas/contact.schema";
+import { Message, MessageStatus } from "../schemas/contact.schema";
 import { Model, Types } from "mongoose";
 import { Injectable } from "@nestjs/common";
 
@@ -47,5 +47,26 @@ export class ContactDb {
 
     count = async () => {
         return await this.messageModel.countDocuments()
+    }
+
+    countAllStatus = async () => {
+        const response = await this.messageModel.aggregate([
+            {
+                $group: {
+                    _id: '$status',
+                    count: { $sum: 1 }
+                }
+            }
+        ])
+
+        var statusCount = Object.fromEntries(
+            Object.values(MessageStatus).map(s => [s, 0])
+        )
+
+        response.forEach(s => {
+            statusCount[s._id] = s.count
+        })
+
+        return statusCount
     }
 }
