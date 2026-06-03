@@ -247,10 +247,20 @@ export class PostsService {
     if (!accessToken && !category)
       throwRpcException(400, "Truy vấn bài đăng cho khách hàng thì cần truyền phân loại.")
 
-    const totalPosts = await this.postsDb.count(accessToken, status, category)
-    if (totalPosts === 0)
-      return { message: 'Chưa có bài đăng nào' }
+    // Get posts of each status
+    let statusNumber
+    if (accessToken)
+      statusNumber = await this.postsDb.countAllStatus()
 
+    const totalPosts = await this.postsDb.count(accessToken, status, category)
+    if (totalPosts === 0) {
+      return {
+        message: 'Chưa có bài đăng nào',
+        data: {
+          status: statusNumber
+        }
+      }
+    }
     const totalPages = Math.ceil(totalPosts / limit)
     if (page > totalPages)
       return throwRpcException(409, "Số trang vượt quá giới hạn.")
@@ -265,11 +275,6 @@ export class PostsService {
       data = response
       delete data.authorId
     }
-
-    // Get posts of each status
-    let statusNumber
-    if (accessToken)
-      statusNumber = await this.postsDb.countAllStatus()
 
     return {
       message: 'Lấy danh sách bài đăng thành công',
