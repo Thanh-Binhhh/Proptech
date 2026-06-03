@@ -110,7 +110,7 @@ export class ContactService {
       },
       data: {
         status: responseStatus,
-        contact: data
+        contacts: data
       }
     };
   };
