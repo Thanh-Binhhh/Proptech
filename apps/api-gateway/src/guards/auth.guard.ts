@@ -19,7 +19,7 @@ export class AuthGuard implements CanActivate {
 
         if (isPublic) return true;
 
-        const message = 'Không thể xác thực người dùng'
+        const message = 'Không thể xác thực người dùng.'
         const request = context.switchToHttp().getRequest<Request>();
         const token = this.extractTokenFromCookie(request);
 

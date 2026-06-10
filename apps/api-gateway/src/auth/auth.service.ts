@@ -74,9 +74,8 @@ export class AuthService {
 
     getMe = async (req) => {
         try {
-            const accessToken = await getTokenFromCookies(req, 'access')
             const response = await firstValueFrom(
-                this.authService.send(AUTH_PATTERNS.ME, accessToken)
+                this.authService.send(AUTH_PATTERNS.ME, req.sub)
             )
             return response
         } catch (error) {

@@ -177,15 +177,8 @@ export class AuthService {
         }
     }
 
-    getMe = async (token) => {
-        const payload = await this.jwtService.verifyAsync(
-            token, {
-            secret: process.env.SECRET_KEY
-        })
-
-        const response = await this.authDb.findById(payload.sub)
-        if (!response)
-            return throwRpcException(404, 'ID người dùng không chính xác.')
+    getMe = async (sub) => {
+        const response = await this.authDb.findById(sub)
 
         const { _id, name, email, role, status } = response
         return {

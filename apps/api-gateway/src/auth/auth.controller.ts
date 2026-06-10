@@ -11,6 +11,7 @@ import type { Request } from 'express';
 import { RoleGuard } from '../guards/role.guard';
 import { AUTH_ROLE_PATTERNS } from '@app/contracts/auth/auth.role-patterns';
 import { Roles } from '../guards/decorator/roles.decorator';
+import { User } from '../guards/decorator/me.decorater';
 
 @UseGuards(AuthGuard)
 @Controller('auth')
@@ -64,9 +65,9 @@ export class AuthController {
 
     @Get('me')
     async getMe(
-        @Req() req: any
+        @User() user
     ) {
-        return await this.authService.getMe(req)
+        return await this.authService.getMe(user)
     }
 
     @Post('logout')
