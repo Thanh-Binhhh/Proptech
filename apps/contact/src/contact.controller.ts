@@ -17,7 +17,7 @@ export class ContactController {
 
   @MessagePattern(CONTACTS_PATTERNS.UPDATE)
   async update(@Payload() payload: {
-    accessToken: string,
+    actionBy,
     _id: string,
     request: UpdateStatusDto
   }) {

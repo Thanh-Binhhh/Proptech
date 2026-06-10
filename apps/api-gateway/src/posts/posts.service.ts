@@ -42,28 +42,25 @@ export class PostsService {
   /*==========================
     POSTS
   ============================*/
-  create = async (req, request, coverPicture) => {
+  create = async (author, request, coverPicture) => {
     try {
-      const accessToken = await getTokenFromCookies(req, 'access')
-      return await this.postsClient.send(POSTS_PATTERNS.CREATE, { accessToken, request, coverPicture });
+      return await this.postsClient.send(POSTS_PATTERNS.CREATE, { author, request, coverPicture });
     } catch (error) {
       handleMicroserviceError(error)
     }
   }
 
-  update = async (req, _id, request, coverPicture) => {
+  update = async (actionBy, _id, request, coverPicture) => {
     try {
-      const accessToken = await getTokenFromCookies(req, 'access')
-      return await this.postsClient.send(POSTS_PATTERNS.UPDATE, { accessToken, _id, request, coverPicture });
+      return await this.postsClient.send(POSTS_PATTERNS.UPDATE, { actionBy, _id, request, coverPicture });
     } catch (error) {
       handleMicroserviceError(error)
     }
   }
 
-  updateStatus = async (req, _id, request) => {
+  updateStatus = async (actionBy, _id, request) => {
     try {
-      const accessToken = await getTokenFromCookies(req, 'access')
-      return await this.postsClient.send(POSTS_PATTERNS.UPDATE_STATUS, { accessToken, _id, request });
+      return await this.postsClient.send(POSTS_PATTERNS.UPDATE_STATUS, { actionBy, _id, request });
     } catch (error) {
       handleMicroserviceError(error)
     }

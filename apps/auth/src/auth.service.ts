@@ -220,7 +220,6 @@ export class AuthService {
         return {
             _id: response!._id,
             name: response!.name,
-
         }
     }
 

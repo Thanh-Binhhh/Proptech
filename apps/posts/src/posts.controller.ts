@@ -39,7 +39,7 @@ export class PostsController {
   @MessagePattern(POSTS_PATTERNS.CREATE)
   async create(
     @Payload() payload: {
-      accessToken: string,
+      author,
       request: CreatePostDto,
       coverPicture: Express.Multer.File
     }) {
@@ -49,7 +49,7 @@ export class PostsController {
   @MessagePattern(POSTS_PATTERNS.UPDATE)
   async update(
     @Payload() payload: {
-      accessToken: string,
+      actionBy,
       _id: string,
       request: CreatePostDto,
       coverPicture: Express.Multer.File
@@ -60,7 +60,7 @@ export class PostsController {
   @MessagePattern(POSTS_PATTERNS.UPDATE_STATUS)
   async updateStatus(
     @Payload() payload: {
-      accessToken: string,
+      actionBy,
       _id: string,
       request: UpdateStatusPostDto,
     }) {

@@ -19,10 +19,9 @@ export class ContactService {
         }
     }
 
-    update = async (req, _id, request) => {
+    update = async (actionBy, _id, request) => {
         try {
-            const accessToken = await getTokenFromCookies(req, 'access')
-            return await this.contactService.send(CONTACTS_PATTERNS.UPDATE, { accessToken, _id, request })
+            return await this.contactService.send(CONTACTS_PATTERNS.UPDATE, { actionBy, _id, request })
         } catch (error) {
             handleMicroserviceError(error)
         }

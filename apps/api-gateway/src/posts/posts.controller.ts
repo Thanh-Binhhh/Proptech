@@ -10,6 +10,7 @@ import { Roles } from '../guards/decorator/roles.decorator';
 import { AUTH_ROLE_PATTERNS } from '@app/contracts/auth/auth.role-patterns';
 import { UpdateStatusPostDto } from '@app/contracts/posts/update-post-status.dto';
 import { UpdatePostDto } from '@app/contracts/posts/update-post.dto';
+import { User } from '../guards/decorator/me.decorater';
 
 @UseGuards(AuthGuard)
 @Controller('posts')
@@ -39,33 +40,33 @@ export class PostsController {
   @Post()
   @UseInterceptors(FileInterceptor('cover_picture'))
   async create(
-    @Req() req: Request,
+    @User() author,
     @Body() request: CreatePostDto,
     @UploadedFile() coverPicture: Express.Multer.File
   ) {
-    return await this.postsService.create(req, request, coverPicture);
+    return await this.postsService.create(author, request, coverPicture);
   }
 
   @Patch(':_id')
   @UseInterceptors(FileInterceptor('cover_picture'))
   async update(
-    @Req() req: Request,
+    @User() actionBy,
     @Param('_id') _id: string,
     @Body() request: UpdatePostDto,
     @UploadedFile() coverPicture: Express.Multer.File
   ) {
-    return await this.postsService.update(req, _id, request, coverPicture);
+    return await this.postsService.update(actionBy, _id, request, coverPicture);
   }
 
   @UseGuards(RoleGuard)
   @Roles(AUTH_ROLE_PATTERNS.MANAGER)
   @Patch('status/:_id')
   async updateStatus(
-    @Req() req: Request,
+    @User() actionBy,
     @Param('_id') _id: string,
     @Body() request: UpdateStatusPostDto,
   ) {
-    return await this.postsService.updateStatus(req, _id, request);
+    return await this.postsService.updateStatus(actionBy, _id, request);
   }
 
   @Public()

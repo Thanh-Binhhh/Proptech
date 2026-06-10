@@ -4,6 +4,7 @@ import { Public } from '../guards/decorator/public.decorater';
 import { ContactService } from './contact.service';
 import { CreateContactDto } from '@app/contracts/contact/create-contact.dto';
 import { UpdateStatusDto } from '@app/contracts/contact/update-status.dto';
+import { User } from '../guards/decorator/me.decorater';
 
 @UseGuards(AuthGuard)
 @Controller('contact')
@@ -20,11 +21,11 @@ export class ContactController {
 
   @Patch(':_id')
   async update(
-    @Req() req: Request,
+    @User() actionBy,
     @Param('_id') _id: string,
     @Body() request: UpdateStatusDto
   ) {
-    return await this.contactService.update(req, _id, request);
+    return await this.contactService.update(actionBy, _id, request);
   }
 
   @Get(':_id')

@@ -26,19 +26,13 @@ export class PostsService {
     CU POSTS
   ============================*/
   create = async (payload) => {
-    const { accessToken, request, coverPicture } = payload
+    const { author, request, coverPicture } = payload
 
     try {
       // If there is a cover picture, upload it to Cloudinary.
       let cover_picture
       if (coverPicture)
         cover_picture = await this.uploadToCloudinary(coverPicture)
-
-      // Get the author of the post.
-      const author = await this.jwtService.verifyAsync(
-        accessToken, {
-        secret: process.env.SECRET_KEY
-      })
 
       const response = await this.postsDb.create({
         ...request,
@@ -70,7 +64,7 @@ export class PostsService {
   }
 
   update = async (payload) => {
-    const { accessToken, _id, request, coverPicture } = payload
+    const { updatedBy, _id, request, coverPicture } = payload
     let cover_picture
 
     try {
@@ -78,8 +72,7 @@ export class PostsService {
 
       // Only managers are allowed to 
       // update post statuses and modify published posts.
-      const actionBy = await this.extractUserFromToken(accessToken)
-      if (actionBy.role !== AccountRole.MANAGER) {
+      if (updatedBy.role !== AccountRole.MANAGER) {
         if (oldPost.data.status === PostStatus_Stage2.PUBLISHED)
           throwRpcException(403, 'Chỉ quản lý mới có thể cập nhật bài đăng đã xuất bản.')
         else if (oldPost.data.status !== request.status
@@ -92,7 +85,7 @@ export class PostsService {
       if (coverPicture)
         cover_picture = await this.uploadToCloudinary(coverPicture)
 
-      await this.handleStatusTransition(_id, oldPost.data!.status, request, actionBy.sub)
+      await this.handleStatusTransition(_id, oldPost.data!.status, request, updatedBy.sub)
       const response = await this.postsDb.update(
         _id,
         {
@@ -143,11 +136,10 @@ export class PostsService {
 
   updateStatus = async (payload) => {
     try {
-      const { accessToken, _id, request } = payload
+      const { actionBy, _id, request } = payload
 
       const oldPost = await this.findOne({ _id })
       const oldStatus = oldPost.data.status
-      const actionBy = await this.extractUserFromToken(accessToken)
       const { message, response } = await this.handleStatusTransition(_id, oldStatus, request, actionBy.sub)
 
       const employee = await firstValueFrom(
@@ -195,36 +187,6 @@ export class PostsService {
       data: {
         ...res,
         author
-      }
-    }
-  }
-
-  findByStatus = async (payload) => {
-    const { page, status } = payload
-    const limit = 12
-    const skip = (page - 1) * limit
-
-    const totalPosts = await this.postsDb.countByStatus(status)
-    if (totalPosts === 0)
-      return { message: 'Chưa có bài đăng nào tương ứng với trạng thái này.' }
-
-    const totalPages = Math.ceil(totalPosts / limit)
-    if (page > totalPages)
-      return throwRpcException(409, "Số trang vượt quá giới hạn.")
-
-    const response = await this.postsDb.findByStatus(skip, limit, status)
-    const posts = await this.getAuthors(response)
-
-    return {
-      message: 'Lấy danh sách bài đăng theo trạng thái thành công.',
-      pagination: {
-        page,
-        limit,
-        totalPosts,
-        totalPages,
-      },
-      data: {
-        posts
       }
     }
   }

@@ -53,17 +53,6 @@ export class PostsDb {
             .populate('category', 'name')
     }
 
-    findByStatus = async (skip, limit, status) => {
-        return await this.postModel
-            .find({ status })
-            .select('-region -createdAt -htmlSource -jsonSource')
-            .skip(skip)
-            .limit(limit)
-            .populate('category', 'name')
-            .sort({ createdAt: -1 })
-            .lean()
-    }
-
     find = async (skip, limit, status, categoryId, token) => {
         const filter = this.filter(token, status, categoryId)
         let select = token

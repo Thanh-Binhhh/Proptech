@@ -45,17 +45,13 @@ export class ContactService {
   }
 
   update = async (payload) => {
-    const { accessToken, _id, request } = payload
+    const { actionBy, _id, request } = payload
     let response = await this.findOne(_id)
 
-    const resolver = await this.jwtService.verifyAsync(
-      accessToken, {
-      secret: process.env.SECRET_KEY
-    })
-    response = await this.contactDb.update(_id, request.status, resolver.sub)
+    response = await this.contactDb.update(_id, request.status, actionBy.sub)
 
     return {
-      message: 'Cập nhật trạng thái yêu cầu tư vấn thành công',
+      message: 'Cập nhật trạng thái yêu cầu tư vấn thành công.',
       data: response
     }
   }
