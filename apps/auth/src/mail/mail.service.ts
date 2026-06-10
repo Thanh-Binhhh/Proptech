@@ -11,7 +11,7 @@ export class MailService {
 
     sendFirstLoginMail = async (_id, name, email) => {
         const token = await this.generateToken(_id)
-        const url = `${process.env.FE_PUBLIC_URL}/auth/reset-password?token=${token}`
+        const url = `${process.env.FE_PUBLIC_URL}/auth/setup-password?token=${token}`
 
         await this.mailerService.sendMail({
             to: email,
