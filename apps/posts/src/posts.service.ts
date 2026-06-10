@@ -1,26 +1,55 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, OnApplicationBootstrap } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { RpcException } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { CloudinaryService } from './pictures/cloudinary.service';
 import { PostsDb } from './posts.db';
 import { buildMap, throwRpcException } from '@app/contracts/helper-functions';
-import { JwtService } from '@nestjs/jwt';
 import { PostStatus_Stage1, PostStatus_Stage2, PostStatus_Stage3 } from './schemas/post-status';
 import { AUTH } from 'libs/contracts/constant';
 import { AUTH_PATTERNS } from '@app/contracts/auth/auth.patterns';
 import { AccountRole } from 'apps/auth/src/schemas/register.schema';
+import { ElasticSearchService } from './elasticsearch.service';
 
 @Injectable()
-export class PostsService {
+export class PostsService implements OnApplicationBootstrap {
   constructor(
     private readonly postsDb: PostsDb,
-    private readonly jwtService: JwtService,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly elasticsearchService: ElasticSearchService,
 
     @Inject(AUTH)
     private readonly authService: ClientProxy
   ) { }
+
+  async onApplicationBootstrap() {
+    await this.syncPostsToElasticsearchOnStartup();
+  }
+
+  async syncPostsToElasticsearchOnStartup() {
+    try {
+      const elasticCount = await this.elasticsearchService.countPostsInIndex();
+
+      if (elasticCount > 0)
+        return;
+
+      const posts = await this.postsDb.findForElasticsearch();
+
+      const postSearchDocuments = posts.map((post: any) => ({
+        _id: String(post._id),
+        title: post.title,
+        developer: post.developer,
+        location: post.location,
+        region: post.region,
+        status: post.status,
+        updatedAt: post.updatedAt || new Date(),
+      }));
+
+      await this.elasticsearchService.bulkIndexPosts(postSearchDocuments);
+    } catch (error) {
+      throwRpcException(500, "Lỗi khi đồng bộ dữ liệu lên Elasticsearch.")
+    }
+  }
 
   /*==========================
     CU POSTS
@@ -107,10 +136,10 @@ export class PostsService {
 
       // Format the response
       const author = await firstValueFrom(
-        this.authService.send(AUTH_PATTERNS.FIND_ONE, { _id: response.authorId }),
+        this.authService.send(AUTH_PATTERNS.FIND_ONE, { _id: response!.authorId }),
       );
 
-      const { authorId, ...rest } = response.toObject()
+      const { authorId, ...rest } = response!.toObject()
 
       return {
         message: 'Cập nhật bài đăng thành công.',
@@ -177,11 +206,11 @@ export class PostsService {
     let author
     if (accessToken) {
       author = await firstValueFrom(
-        this.authService.send(AUTH_PATTERNS.FIND_ONE, { _id: response.authorId }),
+        this.authService.send(AUTH_PATTERNS.FIND_ONE, { _id: response!.authorId }),
       );
     }
 
-    const { authorId, ...res } = response.toObject()
+    const { authorId, ...res } = response!.toObject()
     return {
       message: 'Lấy thông tin bài đăng thành công',
       data: {
@@ -217,12 +246,13 @@ export class PostsService {
     const totalPosts = await this.postsDb.count(accessToken, status, category)
     if (totalPosts === 0) {
       return {
-        message: 'Chưa có bài đăng nào',
+        message: 'Chưa có bài đăng nào.',
         data: {
           status: statusNumber
         }
       }
     }
+
     const totalPages = Math.ceil(totalPosts / limit)
     if (page > totalPages)
       return throwRpcException(409, "Số trang vượt quá giới hạn.")
@@ -253,6 +283,45 @@ export class PostsService {
     }
   }
 
+  search = async (payload) => {
+    const { accessToken, page, keyword } = payload
+    const limit = 12
+    const skip = (page - 1) * limit
+
+    const response = await this.elasticsearchService.search({
+      accessToken, page, limit, skip, keyword
+    });
+
+    if (!response.ids.length) {
+      return {
+        message: 'Không tìm thấy bài đăng trùng khớp.'
+      };
+    }
+
+    const posts = await this.postsDb.findByIds(response.ids, accessToken);
+
+    let data
+    if (accessToken)
+      data = await this.getAuthors(posts)
+    else {
+      data = posts
+      delete data.authorId
+    }
+
+    return {
+      message: 'Tìm kiếm bài đăng thành công.',
+      pagination: {
+        page: Number(page) || 1,
+        limit: response.limit,
+        totalPosts: response.total,
+        totalPages: Math.ceil(response.total / response.limit),
+      },
+      data: {
+        posts: data,
+      },
+    }
+  }
+
   /*==========================
     HELPER FUNCTIONS
   ============================*/
@@ -261,18 +330,6 @@ export class PostsService {
     return {
       url: uploadedImage.url,
       publicId: uploadedImage.publicId,
-    }
-  }
-
-  private extractUserFromToken = async (accessToken) => {
-    const actionBy = await this.jwtService.verifyAsync(
-      accessToken, {
-      secret: process.env.SECRET_KEY
-    })
-
-    return {
-      sub: actionBy.sub,
-      role: actionBy.role,
     }
   }
 

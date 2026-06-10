@@ -7,12 +7,14 @@ import { CreateCategoryDto } from '@app/contracts/posts/category.dto';
 import { PostsService } from './posts.service';
 import { CategoriesService } from './categories/categories.service';
 import { UpdateStatusPostDto } from '@app/contracts/posts/update-post-status.dto';
+import { ElasticSearchService } from './elasticsearch.service';
 
 @Controller()
 export class PostsController {
   constructor(
     private readonly categoriesService: CategoriesService,
-    private readonly postsService: PostsService
+    private readonly postsService: PostsService,
+    private readonly searchService: ElasticSearchService
   ) { }
 
   @MessagePattern(CATEGORIES_PATTERNS.CREATE)
@@ -93,5 +95,15 @@ export class PostsController {
       category: string
     }) {
     return await this.postsService.find(payload)
+  }
+
+  @MessagePattern(POSTS_PATTERNS.SEARCH)
+  async search(
+    @Payload() payload: {
+      accessToken: string,
+      page: number,
+      keyword: string
+    }) {
+    return await this.postsService.search(payload)
   }
 }

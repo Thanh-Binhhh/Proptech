@@ -83,4 +83,13 @@ export class PostsService {
       handleMicroserviceError(error)
     }
   }
+
+  search = async (req, page, keyword) => {
+    try {
+      const accessToken = req.cookies?.access_token
+      return await this.postsClient.send(POSTS_PATTERNS.SEARCH, { accessToken, page, keyword });
+    } catch (error) {
+      handleMicroserviceError(error)
+    }
+  }
 }

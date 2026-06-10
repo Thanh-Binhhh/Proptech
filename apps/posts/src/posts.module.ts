@@ -4,6 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { SignOptions } from 'jsonwebtoken';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ElasticsearchModule } from '@nestjs/elasticsearch';
 import { Post, PostSchema } from './schemas/create-posts.schema';
 import { PostsController } from './posts.controller';
 import { PostsService } from './posts.service';
@@ -15,6 +16,7 @@ import { CategoriesDb } from './categories/categories.db';
 import { Category, CategorySchema } from './schemas/categories.schema';
 import { PostStatusHistory, PostStatusHistorySchema } from './schemas/status-history.schema';
 import { AUTH } from 'libs/contracts/constant';
+import { ElasticSearchService } from './elasticsearch.service';
 
 @Module({
   imports: [
@@ -78,8 +80,22 @@ import { AUTH } from 'libs/contracts/constant';
         }),
       },
     ]),
+
+    ElasticsearchModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const node = configService.get<string>('ELASTICSEARCH_NODE');
+
+        console.log('ELASTICSEARCH_NODE:', node);
+
+        return {
+          node,
+        };
+      },
+    }),
   ],
   controllers: [PostsController],
-  providers: [PostsService, CloudinaryService, CategoriesService, CloudinaryProvider, PostsDb, CategoriesDb],
+  providers: [PostsService, CloudinaryService, CategoriesService, ElasticSearchService, CloudinaryProvider, PostsDb, CategoriesDb],
 })
 export class PostsModule { }

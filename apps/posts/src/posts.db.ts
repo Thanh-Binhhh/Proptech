@@ -53,11 +53,36 @@ export class PostsDb {
             .populate('category', 'name')
     }
 
+    findForElasticsearch = async () => {
+        return await this.postModel
+            .find({ category: '6a169b6722a073de8d0ca587' })
+            .lean()
+    }
+
+    findByIds = async (ids: string[], token?: string) => {
+        let select = token
+            ? '-region -createdAt -htmlSource -jsonSource'
+            : '_id title developer location cover_picture status'
+
+        const posts = await this.postModel
+            .find({ _id: { $in: ids } })
+            .select(select)
+            .lean();
+
+        const postMap = new Map(
+            posts.map((post: any) => [String(post._id), post]),
+        );
+
+        return ids
+            .map((id) => postMap.get(String(id)))
+            .filter(Boolean);
+    }
+
     find = async (skip, limit, status, categoryId, token) => {
         const filter = this.filter(token, status, categoryId)
         let select = token
             ? '-region -createdAt -htmlSource -jsonSource'
-            : '_id title developer location cover_picture'
+            : '_id title developer location cover_picture status'
 
         let query = this.postModel
             .find(filter)

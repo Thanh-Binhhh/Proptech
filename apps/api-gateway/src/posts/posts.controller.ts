@@ -70,6 +70,16 @@ export class PostsController {
   }
 
   @Public()
+  @Get('search')
+  async search(
+    @Req() req: Request,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('keyword') keyword: string,
+  ) {
+    return this.postsService.search(req, page, keyword);
+  }
+
+  @Public()
   @Get(':_id')
   async findOne(
     @Req() req: Request,
