@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { POSTS } from '../../../../libs/contracts/constant';
 import { ClientProxy } from '@nestjs/microservices';
 import { POSTS_PATTERNS } from '@app/contracts/posts/posts.patterns';
-import { getTokenFromCookies, handleMicroserviceError } from '@app/contracts/helper-functions';
+import { handleMicroserviceError } from '@app/contracts/helper-functions';
 import { CATEGORIES_PATTERNS } from '@app/contracts/posts/categories.patterns';
 
 @Injectable()

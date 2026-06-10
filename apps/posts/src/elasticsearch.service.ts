@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { ConfigService } from '@nestjs/config';
 import { PostStatus_Stage2 } from './schemas/post-status';
+import { throwRpcException } from '@app/contracts/helper-functions';
 
 interface PostSearchDocument {
     _id: string;
@@ -46,7 +47,7 @@ export class ElasticSearchService implements OnModuleInit {
                 });
             }
         } catch (error) {
-            console.error('Elasticsearch init error:', error);
+            throwRpcException(500, error)
         }
     }
 

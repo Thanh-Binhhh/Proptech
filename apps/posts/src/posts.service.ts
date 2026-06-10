@@ -69,6 +69,8 @@ export class PostsService implements OnApplicationBootstrap {
         authorId: author.sub
       })
 
+      await this.syncPostToElasticsearch(response, 'create');
+
       let message
       if (!request.status || request.status === PostStatus_Stage1.DRAFT)
         message = 'Bản nháp đã được lưu.'
@@ -122,6 +124,8 @@ export class PostsService implements OnApplicationBootstrap {
           cover_picture,
         }
       )
+
+      await this.syncPostToElasticsearch(response, 'update');
 
       if (cover_picture && oldPost.data!.cover_picture) {
         try {
@@ -325,6 +329,24 @@ export class PostsService implements OnApplicationBootstrap {
   /*==========================
     HELPER FUNCTIONS
   ============================*/
+  private syncPostToElasticsearch = async (post, action = 'index') => {
+    try {
+      if (!post) return;
+
+      await this.elasticsearchService.indexPost({
+        _id: String(post._id),
+        title: post.title,
+        developer: post.developer,
+        location: post.location,
+        region: post.region,
+        status: post.status,
+        updatedAt: post.updatedAt || new Date(),
+      });
+    } catch (error) {
+      console.error(`Lỗi khi đồng bộ lên Elasticsearch - [${action}]:`, error);
+    }
+  };
+
   private uploadToCloudinary = async (coverPicture) => {
     const uploadedImage = await this.cloudinaryService.upload(coverPicture)
     return {
@@ -382,7 +404,9 @@ export class PostsService implements OnApplicationBootstrap {
         break
     }
 
-    await this.postsDb.updateStatus(_id, request.status)
+    const updatedPost = await this.postsDb.updateStatus(_id, request.status)
+    await this.syncPostToElasticsearch(updatedPost, 'updateStatus');
+
     return { message, response }
   }
 
