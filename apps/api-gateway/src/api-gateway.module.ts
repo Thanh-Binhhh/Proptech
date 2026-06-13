@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { PostsModule } from './posts/posts.module';
 import { ConfigModule } from '@nestjs/config';
 import { ContactModule } from './contact/contact.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -13,7 +14,8 @@ import { ContactModule } from './contact/contact.module';
   }),
     AuthModule,
     PostsModule,
-    ContactModule
+    ContactModule,
+    AnalyticsModule
   ],
   controllers: [ApiGatewayController],
   providers: [ApiGatewayService],
