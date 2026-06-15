@@ -95,7 +95,7 @@ export class PostsService implements OnApplicationBootstrap {
   }
 
   update = async (payload) => {
-    const { updatedBy, _id, request, coverPicture } = payload
+    const { actionBy, _id, request, coverPicture } = payload
     let cover_picture
 
     try {
@@ -103,7 +103,7 @@ export class PostsService implements OnApplicationBootstrap {
 
       // Only managers are allowed to 
       // update post statuses and modify published posts.
-      if (updatedBy.role !== AccountRole.MANAGER) {
+      if (actionBy.role !== AccountRole.MANAGER) {
         if (oldPost.data.status === PostStatus_Stage2.PUBLISHED)
           throwRpcException(403, 'Chỉ quản lý mới có thể cập nhật bài đăng đã xuất bản.')
         else if (oldPost.data.status !== request.status
@@ -116,7 +116,7 @@ export class PostsService implements OnApplicationBootstrap {
       if (coverPicture)
         cover_picture = await this.uploadToCloudinary(coverPicture)
 
-      await this.handleStatusTransition(_id, oldPost.data!.status, request, updatedBy.sub)
+      await this.handleStatusTransition(_id, oldPost.data!.status, request, actionBy.sub)
       const response = await this.postsDb.update(
         _id,
         {
@@ -421,12 +421,12 @@ export class PostsService implements OnApplicationBootstrap {
     return await this.postsDb.createStatusHistory(_id, payload)
   }
 
-  private getAuthors = async (response) => {
-    const authorIds = [
+  private getAuthors = async (response: any[]) => {
+    const authorIds: string[] = [
       ...new Set(
         response
           .map((post) => post.authorId?.toString())
-          .filter(Boolean),
+          .filter((id): id is string => typeof id === 'string'),
       ),
     ];
 
@@ -439,13 +439,14 @@ export class PostsService implements OnApplicationBootstrap {
     ]);
 
     return response.map((post) => {
-      const { authorId, ...rest } = post
-      const author = authorMap.get(authorId)
+      const { authorId, ...rest } = post;
+
+      const author = authorMap.get(authorId?.toString());
 
       return {
         ...rest,
         ...(author ? { author } : {}),
       };
     });
-  }
+  };
 }

@@ -4,6 +4,11 @@ services:
     ports:
       - '9229:9229'
 
+  analytics:
+    command: npx nest start analytics --debug 0.0.0.0:9233 --watch
+    ports:
+      - '9233:9233'
+
   auth:
     command: npx nest start auth --debug 0.0.0.0:9232 --watch
     ports:
