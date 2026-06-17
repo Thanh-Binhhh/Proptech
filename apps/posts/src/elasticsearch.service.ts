@@ -122,8 +122,8 @@ export class ElasticSearchService implements OnModuleInit {
         });
     }
 
-    async search(payload) {
-        const { accessToken, page, limit, skip, keyword } = payload;
+    async search(payload, accessToken = false) {
+        const { page, limit, skip, keyword } = payload;
 
         const must = keyword
             ? [

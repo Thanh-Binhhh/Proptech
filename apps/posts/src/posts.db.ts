@@ -41,16 +41,24 @@ export class PostsDb {
         });
     }
 
-    findOne = async (token, _id) => {
-        let select = token ? '' : '-authorId'
-
+    findOne = async (_id, token = false) => {
         if (!Types.ObjectId.isValid(_id))
             return null;
 
+        const queryOptions = token
+            ? {
+                filter: { _id },
+                select: '',
+            }
+            : {
+                filter: { _id, status: PostStatus_Stage2.PUBLISHED },
+                select: '-authorId',
+            };
+
         return await this.postModel
-            .findById(_id)
-            .select(select)
-            .populate('category', 'name')
+            .findOne(queryOptions.filter)
+            .select(queryOptions.select)
+            .populate('category', 'name');
     }
 
     findForElasticsearch = async () => {
@@ -59,7 +67,7 @@ export class PostsDb {
             .lean()
     }
 
-    findByIds = async (ids: string[], token?: string) => {
+    findByIds = async (ids: string[], token = false) => {
         let select = token
             ? '-region -createdAt -htmlSource -jsonSource'
             : '_id title developer location cover_picture status'
@@ -78,15 +86,20 @@ export class PostsDb {
             .filter(Boolean);
     }
 
-    find = async (skip, limit, status, categoryId, token) => {
-        const filter = this.filter(token, status, categoryId)
-        let select = token
-            ? '-region -createdAt -htmlSource -jsonSource'
-            : '_id title developer location cover_picture status'
+    find = async (skip, limit, token = false, status?, categoryId?) => {
+        const queryOptions = token
+            ? {
+                filter: this.buildPrivateFilter(status, categoryId),
+                select: '-region -createdAt -htmlSource -jsonSource',
+            }
+            : {
+                filter: this.buildPublicFilter(),
+                select: '_id title developer location cover_picture status',
+            };
 
         let query = this.postModel
-            .find(filter)
-            .select(select)
+            .find(queryOptions.filter)
+            .select(queryOptions.select)
             .skip(skip)
             .limit(limit)
             .sort({ createdAt: -1 })
@@ -97,8 +110,11 @@ export class PostsDb {
         return await query.lean()
     }
 
-    count = async (token, status, categoryId) => {
-        const filter = this.filter(token, status, categoryId)
+    count = async (token = false, status?, categoryId?) => {
+        const filter = token
+            ? this.buildPrivateFilter(status, categoryId)
+            : this.buildPublicFilter()
+
         return await this.postModel.countDocuments(filter)
     }
 
@@ -126,13 +142,16 @@ export class PostsDb {
     /*==========================
         HELPER FUNCTIONS
     ============================*/
-    private filter = (token, status, category) => {
+    private buildPrivateFilter(status?: string, categoryId?: string) {
         return {
-            ...(category ? { category } : {}),
-
-            ...(token ?
-                status ? { status } : {}
-                : { status: PostStatus_Stage2.PUBLISHED }),
+            ...(status ? { status } : {}),
+            ...(categoryId ? { category: categoryId } : {}),
         };
-    };
+    }
+
+    private buildPublicFilter() {
+        return {
+            status: PostStatus_Stage2.PUBLISHED
+        };
+    }
 }

@@ -40,7 +40,34 @@ export class PostsService {
   }
 
   /*==========================
-    POSTS
+    POSTS -- FOR CUSTOMERS
+  ============================*/
+  publicFindOne = async (_id) => {
+    try {
+      return await this.postsClient.send(POSTS_PATTERNS.PUBLIC_FIND_ONE, _id);
+    } catch (error) {
+      handleMicroserviceError(error)
+    }
+  }
+
+  publicFind = async (page) => {
+    try {
+      return await this.postsClient.send(POSTS_PATTERNS.PUBLIC_FIND, page);
+    } catch (error) {
+      handleMicroserviceError(error)
+    }
+  }
+
+  publicSearch = async (page, keyword) => {
+    try {
+      return await this.postsClient.send(POSTS_PATTERNS.PUBLIC_SEARCH, { page, keyword });
+    } catch (error) {
+      handleMicroserviceError(error)
+    }
+  }
+
+  /*==========================
+    POSTS -- FOR INTERNAL COMPANY USE ONLY
   ============================*/
   create = async (author, request, coverPicture) => {
     try {
@@ -66,28 +93,25 @@ export class PostsService {
     }
   }
 
-  findOne = async (req, _id) => {
+  findOne = async (_id) => {
     try {
-      const accessToken = req.cookies?.access_token
-      return await this.postsClient.send(POSTS_PATTERNS.FIND_ONE, { accessToken, _id });
+      return await this.postsClient.send(POSTS_PATTERNS.FIND_ONE, _id);
     } catch (error) {
       handleMicroserviceError(error)
     }
   }
 
-  find = async (req, page, status, category) => {
+  find = async (page, status, category) => {
     try {
-      const accessToken = req.cookies?.access_token
-      return await this.postsClient.send(POSTS_PATTERNS.FIND, { accessToken, page, status, category });
+      return await this.postsClient.send(POSTS_PATTERNS.FIND, { page, status, category });
     } catch (error) {
       handleMicroserviceError(error)
     }
   }
 
-  search = async (req, page, keyword) => {
+  search = async (page, keyword) => {
     try {
-      const accessToken = req.cookies?.access_token
-      return await this.postsClient.send(POSTS_PATTERNS.SEARCH, { accessToken, page, keyword });
+      return await this.postsClient.send(POSTS_PATTERNS.SEARCH, { page, keyword });
     } catch (error) {
       handleMicroserviceError(error)
     }

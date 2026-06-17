@@ -17,6 +17,9 @@ import { User } from '../guards/decorator/me.decorater';
 export class PostsController {
   constructor(private readonly postsService: PostsService) { }
 
+  /*==========================
+    CATEGORIES
+  ============================*/
   @Post('categories')
   async createCategory(
     @Body() request: CreateCategoryDto,
@@ -37,7 +40,38 @@ export class PostsController {
     return await this.postsService.findCategories();
   }
 
-  @Post()
+  /*==========================
+    POSTS -- FOR CUSTOMERS
+  ============================*/
+  @Public()
+  @Get('properties/public/search')
+  async publicSearch(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('keyword') keyword: string,
+  ) {
+    return this.postsService.publicSearch(page, keyword);
+  }
+
+  @Public()
+  @Get('properties/public/:_id')
+  async publicFindOne(
+    @Param('_id') _id: string
+  ) {
+    return this.postsService.publicFindOne(_id);
+  }
+
+  @Public()
+  @Get('properties/public')
+  async publicFind(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+  ) {
+    return await this.postsService.publicFind(page)
+  }
+
+  /*==========================
+    POSTS -- FOR INTERNAL COMPANY USE ONLY
+  ============================*/
+  @Post('properties')
   @UseInterceptors(FileInterceptor('cover_picture'))
   async create(
     @User() author,
@@ -47,7 +81,7 @@ export class PostsController {
     return await this.postsService.create(author, request, coverPicture);
   }
 
-  @Patch(':_id')
+  @Patch('properties/:_id')
   @UseInterceptors(FileInterceptor('cover_picture'))
   async update(
     @User() actionBy,
@@ -69,33 +103,27 @@ export class PostsController {
     return await this.postsService.updateStatus(actionBy, _id, request);
   }
 
-  @Public()
-  @Get('search')
+  @Get('properties/search')
   async search(
-    @Req() req: Request,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('keyword') keyword: string,
   ) {
-    return this.postsService.search(req, page, keyword);
+    return this.postsService.search(page, keyword);
   }
 
-  @Public()
-  @Get(':_id')
+  @Get('properties/:_id')
   async findOne(
-    @Req() req: Request,
     @Param('_id') _id: string
   ) {
-    return this.postsService.findOne(req, _id);
+    return this.postsService.findOne(_id);
   }
 
-  @Public()
-  @Get()
+  @Get('properties')
   async find(
-    @Req() req: Request,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('status') status: string,
     @Query('category') category: string,
   ) {
-    return await this.postsService.find(req, page, status, category)
+    return await this.postsService.find(page, status, category)
   }
 }

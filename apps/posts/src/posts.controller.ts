@@ -15,6 +15,9 @@ export class PostsController {
     private readonly postsService: PostsService
   ) { }
 
+  /*==========================
+    CATEGORIES
+  ============================*/
   @MessagePattern(CATEGORIES_PATTERNS.CREATE)
   async createCategory(
     @Payload() request: CreateCategoryDto
@@ -26,7 +29,7 @@ export class PostsController {
   async editCategory(
     @Payload() payload: {
       _id: string,
-      request: CreatePostDto,
+      request: CreateCategoryDto,
     }) {
     return await this.categoriesService.edit(payload._id, payload.request);
   }
@@ -36,6 +39,34 @@ export class PostsController {
     return await this.categoriesService.find()
   }
 
+  /*==========================
+    POSTS -- FOR CUSTOMERS
+  ============================*/
+  @MessagePattern(POSTS_PATTERNS.PUBLIC_FIND_ONE)
+  async publicFindOne(
+    @Payload() request: string
+  ) {
+    return await this.postsService.publicFindOne(request)
+  }
+
+  @MessagePattern(POSTS_PATTERNS.PUBLIC_FIND)
+  async publicFind(
+    @Payload() request: number) {
+    return await this.postsService.publicFind(request)
+  }
+
+  @MessagePattern(POSTS_PATTERNS.PUBLIC_SEARCH)
+  async publicSearch(
+    @Payload() payload: {
+      page: number,
+      keyword: string
+    }) {
+    return await this.postsService.publicSearch(payload)
+  }
+
+  /*==========================
+    POSTS -- FOR INTERNAL COMPANY USE ONLY
+  ============================*/
   @MessagePattern(POSTS_PATTERNS.CREATE)
   async create(
     @Payload() payload: {
@@ -69,11 +100,9 @@ export class PostsController {
 
   @MessagePattern(POSTS_PATTERNS.FIND_ONE)
   async findOne(
-    @Payload() payload: {
-      accessToken: string,
-      _id: string
-    }) {
-    return await this.postsService.findOne(payload)
+    @Payload() request: string
+  ) {
+    return await this.postsService.findOne(request)
   }
 
   @MessagePattern(POSTS_PATTERNS.FIND_ONE_FOR_CONTACT)
@@ -87,7 +116,6 @@ export class PostsController {
   @MessagePattern(POSTS_PATTERNS.FIND)
   async find(
     @Payload() payload: {
-      accessToken: string,
       page: number,
       status: string,
       category: string
@@ -98,7 +126,6 @@ export class PostsController {
   @MessagePattern(POSTS_PATTERNS.SEARCH)
   async search(
     @Payload() payload: {
-      accessToken: string,
       page: number,
       keyword: string
     }) {

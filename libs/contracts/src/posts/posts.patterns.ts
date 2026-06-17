@@ -6,5 +6,8 @@ export const POSTS_PATTERNS = {
     FIND_ONE_FOR_CONTACT: 'find-one-for-contact-service',
     FIND: 'find',
     SEARCH: 'search',
-    FILTER: 'filter'
+
+    PUBLIC_FIND_ONE: 'public-find-one',
+    PUBLIC_FIND: 'public-find',
+    PUBLIC_SEARCH: 'public-search'
 }

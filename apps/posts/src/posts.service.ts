@@ -13,6 +13,8 @@ import { ElasticSearchService } from './elasticsearch.service';
 
 @Injectable()
 export class PostsService implements OnApplicationBootstrap {
+  private readonly LIMIT = 12;
+
   constructor(
     private readonly postsDb: PostsDb,
     private readonly cloudinaryService: CloudinaryService,
@@ -171,7 +173,7 @@ export class PostsService implements OnApplicationBootstrap {
     try {
       const { actionBy, _id, request } = payload
 
-      const oldPost = await this.findOne({ _id })
+      const oldPost = await this.findOne(_id)
       const oldStatus = oldPost.data.status
       const { message, response } = await this.handleStatusTransition(_id, oldStatus, request, actionBy.sub)
 
@@ -200,26 +202,36 @@ export class PostsService implements OnApplicationBootstrap {
   /*==========================
       QUERY POSTS
   ============================*/
-  findOne = async (payload) => {
-    const { accessToken, _id } = payload
-    const response = await this.postsDb.findOne(accessToken, _id)
+  findOne = async (_id) => {
+    const response = await this.postsDb.findOne(_id, true)
     if (!response)
-      throwRpcException(404, 'Không tìm thấy bài đăng tương ứng')
+      throwRpcException(404, 'Không tìm thấy bài đăng tương ứng.')
 
-    // Format the response
-    let author
-    if (accessToken) {
-      author = await firstValueFrom(
-        this.authService.send(AUTH_PATTERNS.FIND_ONE, { _id: response!.authorId }),
-      );
-    }
+    // Get author of the posts
+    const author = await firstValueFrom(
+      this.authService.send(AUTH_PATTERNS.FIND_ONE, { _id: response!.authorId }),
+    );
 
     const { authorId, ...res } = response!.toObject()
     return {
-      message: 'Lấy thông tin bài đăng thành công',
+      message: 'Lấy thông tin chi tiết bài đăng cho nội bộ công ty thành công.',
       data: {
         ...res,
         author
+      }
+    }
+  }
+
+  publicFindOne = async (_id) => {
+    const response = await this.postsDb.findOne(_id)
+    if (!response)
+      throwRpcException(404, 'Không tìm thấy bài đăng tương ứng.')
+
+    const { authorId, ...res } = response!.toObject()
+    return {
+      message: 'Lấy thông tin chi tiết bài đăng thành công.',
+      data: {
+        ...res,
       }
     }
   }
@@ -235,19 +247,11 @@ export class PostsService implements OnApplicationBootstrap {
   }
 
   find = async (payload) => {
-    const { accessToken, page, status, category } = payload
-    const limit = 12
-    const skip = (page - 1) * limit
+    const { page, status, category } = payload
+    const skip = (page - 1) * this.LIMIT
 
-    if (!accessToken && !category)
-      throwRpcException(400, "Truy vấn bài đăng cho khách hàng thì cần truyền phân loại.")
-
-    // Get posts of each status
-    let statusNumber
-    if (accessToken)
-      statusNumber = await this.postsDb.countAllStatus()
-
-    const totalPosts = await this.postsDb.count(accessToken, status, category)
+    const statusNumber = await this.postsDb.countAllStatus()
+    const totalPosts = await this.postsDb.count(true, status, category)
     if (totalPosts === 0) {
       return {
         message: 'Chưa có bài đăng nào.',
@@ -257,44 +261,64 @@ export class PostsService implements OnApplicationBootstrap {
       }
     }
 
-    const totalPages = Math.ceil(totalPosts / limit)
+    const totalPages = Math.ceil(totalPosts / this.LIMIT)
     if (page > totalPages)
       return throwRpcException(409, "Số trang vượt quá giới hạn.")
 
-    const response = await this.postsDb.find(skip, limit, status, category, accessToken)
-
-    // Get set of employees from Auth service (if exist)
-    let data
-    if (accessToken)
-      data = await this.getAuthors(response)
-    else {
-      data = response
-      delete data.authorId
-    }
+    const response = await this.postsDb.find(skip, this.LIMIT, true, status, category)
+    const posts = await this.getAuthors(response)
 
     return {
-      message: 'Lấy danh sách bài đăng thành công',
+      message: 'Lấy danh sách bài đăng cho nội bộ công ty thành công.',
       pagination: {
         page,
-        limit,
+        limit: this.LIMIT,
         totalPosts,
         totalPages,
       },
       data: {
         status: statusNumber,
-        posts: data
+        posts
+      }
+    }
+  }
+
+  publicFind = async (page) => {
+    const skip = (page - 1) * this.LIMIT
+
+    const totalPosts = await this.postsDb.count()
+    if (totalPosts === 0)
+      return { message: 'Chưa có bài đăng nào được xuất bản.' }
+
+    const totalPages = Math.ceil(totalPosts / this.LIMIT)
+    if (page > totalPages)
+      return throwRpcException(409, "Số trang vượt quá giới hạn.")
+
+    const response = await this.postsDb.find(skip, this.LIMIT)
+    delete response.authorId
+
+    return {
+      message: 'Lấy danh sách bài đăng thành công.',
+      pagination: {
+        page,
+        limit: this.LIMIT,
+        totalPosts,
+        totalPages,
+      },
+      data: {
+        posts: response
       }
     }
   }
 
   search = async (payload) => {
-    const { accessToken, page, keyword } = payload
-    const limit = 12
-    const skip = (page - 1) * limit
+    const { page, keyword } = payload
+    const skip = (page - 1) * this.LIMIT
 
-    const response = await this.elasticsearchService.search({
-      accessToken, page, limit, skip, keyword
-    });
+    const response = await this.elasticsearchService.search(
+      { page, limit: this.LIMIT, skip, keyword },
+      true
+    );
 
     if (!response.ids.length) {
       return {
@@ -302,15 +326,39 @@ export class PostsService implements OnApplicationBootstrap {
       };
     }
 
-    const posts = await this.postsDb.findByIds(response.ids, accessToken);
+    const posts = await this.postsDb.findByIds(response.ids, true);
+    const data = await this.getAuthors(posts)
 
-    let data
-    if (accessToken)
-      data = await this.getAuthors(posts)
-    else {
-      data = posts
-      delete data.authorId
+    return {
+      message: 'Tìm kiếm bài đăng cho nội bộ công ty thành công.',
+      pagination: {
+        page: Number(page) || 1,
+        limit: response.limit,
+        totalPosts: response.total,
+        totalPages: Math.ceil(response.total / response.limit),
+      },
+      data: {
+        posts: data,
+      },
     }
+  }
+
+  publicSearch = async (payload) => {
+    const { page, keyword } = payload
+    const skip = (page - 1) * this.LIMIT
+
+    const response = await this.elasticsearchService.search(
+      { page, limit: this.LIMIT, skip, keyword }
+    );
+
+    if (!response.ids.length) {
+      return {
+        message: 'Không tìm thấy bài đăng trùng khớp.'
+      };
+    }
+
+    const posts = await this.postsDb.findByIds(response.ids);
+    delete posts.authorId
 
     return {
       message: 'Tìm kiếm bài đăng thành công.',
@@ -321,7 +369,7 @@ export class PostsService implements OnApplicationBootstrap {
         totalPages: Math.ceil(response.total / response.limit),
       },
       data: {
-        posts: data,
+        posts
       },
     }
   }
