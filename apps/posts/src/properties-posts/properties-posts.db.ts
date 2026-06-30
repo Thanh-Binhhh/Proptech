@@ -1,10 +1,10 @@
 import { InjectModel } from "@nestjs/mongoose";
-import { Post } from "../schemas/create-posts.schema";
+import { Post } from "./schemas/create-posts.schema";
 import { Model, Types } from "mongoose";
-import { PostStatusHistory } from "../schemas/status-history.schema";
-import {  PostStatus_Stage2, PostStatusValues } from "../schemas/post-status";
+import { PostStatusHistory } from "./schemas/status-history.schema";
+import { PostStatus_Stage2, PostStatusValues } from "./schemas/post-status";
 
-export class PostsDb {
+export class PropertyPostsDb {
     constructor(
         @InjectModel(Post.name)
         private readonly postModel: Model<Post>,
@@ -32,13 +32,6 @@ export class PostsDb {
             { $set: { status } },
             { new: true },
         )
-    }
-
-    createStatusHistory = async (_id, request) => {
-        return await this.postStatusHistoryModel.create({
-            postId: new Types.ObjectId(_id),
-            ...request
-        });
     }
 
     findOne = async (_id, token = false) => {

@@ -1,6 +1,6 @@
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
-import { Category } from "../schemas/categories.schema";
+import { Category } from "./schemas/categories.schema";
 
 export class CategoriesDb {
     constructor(

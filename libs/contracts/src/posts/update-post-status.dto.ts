@@ -1,4 +1,4 @@
-import { PostStatus_Stage2, PostStatus_Stage3, PostStatusValues } from 'apps/posts/src/schemas/post-status'
+import { PostStatusValues } from 'apps/posts/src/properties-posts/schemas/post-status'
 import {
     IsIn,
     IsNotEmpty,

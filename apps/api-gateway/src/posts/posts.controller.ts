@@ -1,16 +1,18 @@
 import { Controller, Get, Post, Body, UseInterceptors, UploadedFile, Param, Query, DefaultValuePipe, ParseIntPipe, UseGuards, Put, Req, Patch } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PostsService } from './posts.service';
-import { CreatePostDto } from '@app/contracts/posts/create-post.dto';
+import { CreatePostDto } from '@app/contracts/posts/properties/create-post.dto';
 import { AuthGuard } from '../guards/auth.guard';
 import { Public } from '../guards/decorator/public.decorater';
-import { CreateCategoryDto } from '@app/contracts/posts/category.dto';
+import { CreateCategoryDto } from '@app/contracts/posts/categories/category.dto';
 import { RoleGuard } from '../guards/role.guard';
 import { Roles } from '../guards/decorator/roles.decorator';
 import { AUTH_ROLE_PATTERNS } from '@app/contracts/auth/auth.role-patterns';
 import { UpdateStatusPostDto } from '@app/contracts/posts/update-post-status.dto';
-import { UpdatePostDto } from '@app/contracts/posts/update-post.dto';
+import { UpdatePostDto } from '@app/contracts/posts/properties/update-post.dto';
 import { User } from '../guards/decorator/me.decorater';
+import { CreateNewsDto } from '@app/contracts/posts/news/create-news.dto';
+import { UpdateNewsDto } from '@app/contracts/posts/news/update-news.dto';
 
 @UseGuards(AuthGuard)
 @Controller('posts')
@@ -135,18 +137,54 @@ export class PostsController {
   async publicFindANews(
     @Param('_id') _id: string
   ) {
-    return this.postsService.publicFindANews(_id);
+    return this.postsService.publicFindOneNews(_id);
   }
 
   @Public()
   @Get('news/public')
   async publicFindNews(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('status') status: string,
   ) {
-    return await this.postsService.publicFindNews(page)
+    return await this.postsService.publicFindNews(page, status)
   }
 
   /*==========================
     NEWS -- FOR INTERNAL COMPANY USE ONLY
   ============================*/
+  @Post('news')
+  @UseInterceptors(FileInterceptor('cover_picture'))
+  async createNews(
+    @User() author,
+    @Body() request: CreateNewsDto,
+    @UploadedFile() coverPicture: Express.Multer.File
+  ) {
+    return await this.postsService.createNews(author, request, coverPicture);
+  }
+
+  @Patch('news/:_id')
+  @UseInterceptors(FileInterceptor('cover_picture'))
+  async updateNews(
+    @User() actionBy,
+    @Param('_id') _id: string,
+    @Body() request: UpdateNewsDto,
+    @UploadedFile() coverPicture: Express.Multer.File
+  ) {
+    return await this.postsService.updateNews(actionBy, _id, request, coverPicture);
+  }
+
+  @Get('news/:_id')
+  async findOneNews(
+    @Param('_id') _id: string
+  ) {
+    return this.postsService.findOneNews(_id);
+  }
+
+  @Get('news')
+  async findNews(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('status') status: string,
+  ) {
+    return await this.postsService.findNews(page, status)
+  }
 }

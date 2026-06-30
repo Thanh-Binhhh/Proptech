@@ -1,5 +1,5 @@
-import { Region } from 'apps/posts/src/schemas/create-posts.schema'
-import { PostStatusValues } from 'apps/posts/src/schemas/post-status'
+import { Region } from 'apps/posts/src/properties-posts/schemas/create-posts.schema'
+import { PostStatusValues } from 'apps/posts/src/properties-posts/schemas/post-status'
 import {
     IsEnum,
     IsOptional,

@@ -1,9 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { POSTS } from '../../../../libs/contracts/constant';
 import { ClientProxy } from '@nestjs/microservices';
-import { POSTS_PATTERNS } from '@app/contracts/posts/posts.patterns';
 import { handleMicroserviceError } from '@app/contracts/helper-functions';
-import { CATEGORIES_PATTERNS } from '@app/contracts/posts/categories.patterns';
+import { POSTS } from '../../../../libs/contracts/constant';
+import { CATEGORIES_PATTERNS } from '@app/contracts/posts/categories/categories.patterns';
+import { POSTS_PATTERNS } from '@app/contracts/posts/properties/properties.patterns';
+import { NEWS_PATTERNS } from '@app/contracts/posts/news/news.patterns';
 
 @Injectable()
 export class PostsService {
@@ -120,17 +121,52 @@ export class PostsService {
   /*==========================
     NEWS -- FOR CUSTOMERS
   ============================*/
-  publicFinANews = async (_id) => {
+  publicFindOneNews = async (_id) => {
     try {
-      return await this.postsClient.send(POSTS_PATTERNS.PUBLIC_FIND_ONE, _id);
+      return await this.postsClient.send(NEWS_PATTERNS.PUBLIC_FIND_ONE, _id);
     } catch (error) {
       handleMicroserviceError(error)
     }
   }
 
-  publicFindNews = async (page) => {
+  publicFindNews = async (page, status) => {
     try {
-      return await this.postsClient.send(POSTS_PATTERNS.PUBLIC_FIND, page);
+      return await this.postsClient.send(NEWS_PATTERNS.PUBLIC_FIND, { page, status });
+    } catch (error) {
+      handleMicroserviceError(error)
+    }
+  }
+
+  /*==========================
+    NEWS -- FOR INTERNAL COMPANY USE ONLY
+  ============================*/
+  createNews = async (author, request, coverPicture) => {
+    try {
+      return await this.postsClient.send(NEWS_PATTERNS.CREATE, { author, request, coverPicture });
+    } catch (error) {
+      handleMicroserviceError(error)
+    }
+  }
+
+  updateNews = async (actionBy, _id, request, coverPicture) => {
+    try {
+      return await this.postsClient.send(NEWS_PATTERNS.UPDATE, { actionBy, _id, request, coverPicture });
+    } catch (error) {
+      handleMicroserviceError(error)
+    }
+  }
+
+  findOneNews = async (_id) => {
+    try {
+      return await this.postsClient.send(NEWS_PATTERNS.FIND_ONE, _id);
+    } catch (error) {
+      handleMicroserviceError(error)
+    }
+  }
+
+  findNews = async (page, status) => {
+    try {
+      return await this.postsClient.send(NEWS_PATTERNS.FIND, { page, status });
     } catch (error) {
       handleMicroserviceError(error)
     }

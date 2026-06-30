@@ -5,7 +5,7 @@ import { ContactDb } from './contact.db';
 import { buildMap, throwRpcException } from '@app/contracts/helper-functions';
 import { firstValueFrom } from 'rxjs';
 import { AUTH, POSTS } from 'libs/contracts/constant';
-import { POSTS_PATTERNS } from '@app/contracts/posts/posts.patterns';
+import { POSTS_PATTERNS } from '@app/contracts/posts/properties/properties.patterns';
 import { AUTH_PATTERNS } from '@app/contracts/auth/auth.patterns';
 
 @Injectable()

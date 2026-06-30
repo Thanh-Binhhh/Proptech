@@ -5,18 +5,23 @@ import { JwtModule } from '@nestjs/jwt';
 import { SignOptions } from 'jsonwebtoken';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ElasticsearchModule } from '@nestjs/elasticsearch';
-import { Post, PostSchema } from './schemas/create-posts.schema';
+import { Post, PostSchema } from './properties-posts/schemas/create-posts.schema';
 import { PostsController } from './posts.controller';
-import { PostsService } from './properties-posts/properties-posts.service';
+import { PropertyPostsService } from './properties-posts/properties-posts.service';
 import { CloudinaryService } from './pictures/cloudinary.service';
-import { PostsDb } from './properties-posts/properties-posts.db';
+import { PropertyPostsDb } from './properties-posts/properties-posts.db';
 import { CloudinaryProvider } from './pictures/cloudinary.provider';
 import { CategoriesService } from './categories/categories.service';
 import { CategoriesDb } from './categories/categories.db';
-import { Category, CategorySchema } from './schemas/categories.schema';
-import { PostStatusHistory, PostStatusHistorySchema } from './schemas/status-history.schema';
+import { Category, CategorySchema } from './categories/schemas/categories.schema';
+import { PostStatusHistory, PostStatusHistorySchema } from './properties-posts/schemas/status-history.schema';
 import { AUTH } from 'libs/contracts/constant';
 import { ElasticSearchService } from './elasticsearch.service';
+import { News, NewsSchema } from './news-posts/schemas/news.schema';
+import { NewsService } from './news-posts/news-post.service';
+import { NewsDb } from './news-posts/news-posts.db';
+import { PostsService } from './posts.service';
+import { PostsDb } from './posts.db';
 
 @Module({
   imports: [
@@ -43,6 +48,13 @@ import { ElasticSearchService } from './elasticsearch.service';
       {
         name: PostStatusHistory.name,
         schema: PostStatusHistorySchema,
+      },
+    ]),
+
+    MongooseModule.forFeature([
+      {
+        name: News.name,
+        schema: NewsSchema,
       },
     ]),
 
@@ -96,6 +108,6 @@ import { ElasticSearchService } from './elasticsearch.service';
     }),
   ],
   controllers: [PostsController],
-  providers: [PostsService, CloudinaryService, CategoriesService, ElasticSearchService, CloudinaryProvider, PostsDb, CategoriesDb],
+  providers: [PostsService, PropertyPostsService, NewsService, CloudinaryService, CategoriesService, ElasticSearchService, CloudinaryProvider, PostsDb, PropertyPostsDb, CategoriesDb, NewsDb],
 })
 export class PostsModule { }

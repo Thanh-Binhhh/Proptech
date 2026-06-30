@@ -1,18 +1,22 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { POSTS_PATTERNS } from '@app/contracts/posts/posts.patterns';
-import { CATEGORIES_PATTERNS } from '@app/contracts/posts/categories.patterns';
-import { CreatePostDto } from '@app/contracts/posts/create-post.dto';
-import { CreateCategoryDto } from '@app/contracts/posts/category.dto';
-import { PostsService } from './properties-posts/properties-posts.service';
+import { POSTS_PATTERNS } from '@app/contracts/posts/properties/properties.patterns';
+import { CATEGORIES_PATTERNS } from '@app/contracts/posts/categories/categories.patterns';
+import { NEWS_PATTERNS } from '@app/contracts/posts/news/news.patterns';
+import { CreatePostDto } from '@app/contracts/posts/properties/create-post.dto';
+import { CreateCategoryDto } from '@app/contracts/posts/categories/category.dto';
+import { PropertyPostsService } from './properties-posts/properties-posts.service';
 import { CategoriesService } from './categories/categories.service';
 import { UpdateStatusPostDto } from '@app/contracts/posts/update-post-status.dto';
+import { NewsService } from './news-posts/news-post.service';
+import { CreateNewsDto } from '@app/contracts/posts/news/create-news.dto';
 
 @Controller()
 export class PostsController {
   constructor(
     private readonly categoriesService: CategoriesService,
-    private readonly postsService: PostsService
+    private readonly postsService: PropertyPostsService,
+    private readonly newsService: NewsService
   ) { }
 
   /*==========================
@@ -130,5 +134,63 @@ export class PostsController {
       keyword: string
     }) {
     return await this.postsService.search(payload)
+  }
+
+  /*==========================
+    NEWS -- FOR CUSTOMERS
+  ============================*/
+  @MessagePattern(NEWS_PATTERNS.PUBLIC_FIND_ONE)
+  async publicfindOneNews(
+    @Payload() request: string) {
+    return await this.newsService.publicFindOne(request)
+  }
+
+  @MessagePattern(NEWS_PATTERNS.PUBLIC_FIND)
+  async publicFindNews(
+    @Payload() payload: {
+      page: number,
+      status: string,
+    }) {
+    return await this.newsService.publicFind(payload)
+  }
+
+  /*==========================
+    NEWS -- FOR INTERNAL COMPANY USE ONLY
+  ============================*/
+  @MessagePattern(NEWS_PATTERNS.CREATE)
+  async createNews(
+    @Payload() payload: {
+      author,
+      request: CreateNewsDto,
+      coverPicture: Express.Multer.File
+    }) {
+    return await this.newsService.create(payload);
+  }
+
+  @MessagePattern(NEWS_PATTERNS.UPDATE)
+  async updateNews(
+    @Payload() payload: {
+      actionBy,
+      _id: string,
+      request: CreatePostDto,
+      coverPicture: Express.Multer.File
+    }) {
+    return await this.newsService.update(payload);
+  }
+
+  @MessagePattern(NEWS_PATTERNS.FIND_ONE)
+  async findOneNews(
+    @Payload() request: string
+  ) {
+    return await this.newsService.findOne(request)
+  }
+
+  @MessagePattern(NEWS_PATTERNS.FIND)
+  async findNews(
+    @Payload() payload: {
+      page: number,
+      status: string,
+    }) {
+    return await this.newsService.find(payload)
   }
 }

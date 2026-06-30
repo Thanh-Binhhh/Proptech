@@ -1,7 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { ConfigService } from '@nestjs/config';
-import { PostStatus_Stage2 } from './schemas/post-status';
+import { PostStatus_Stage2 } from './properties-posts/schemas/post-status';
 import { throwRpcException } from '@app/contracts/helper-functions';
 
 interface PostSearchDocument {
