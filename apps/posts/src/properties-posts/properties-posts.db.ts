@@ -1,8 +1,8 @@
 import { InjectModel } from "@nestjs/mongoose";
-import { Post } from "./schemas/create-posts.schema";
+import { Post } from "../schemas/create-posts.schema";
 import { Model, Types } from "mongoose";
-import { PostStatusHistory } from "./schemas/status-history.schema";
-import { PostStatus_Stage1, PostStatus_Stage2, PostStatusValues } from "./schemas/post-status";
+import { PostStatusHistory } from "../schemas/status-history.schema";
+import {  PostStatus_Stage2, PostStatusValues } from "../schemas/post-status";
 
 export class PostsDb {
     constructor(

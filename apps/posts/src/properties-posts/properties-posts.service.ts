@@ -2,14 +2,14 @@ import { Injectable, Inject, OnApplicationBootstrap } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { RpcException } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { CloudinaryService } from './pictures/cloudinary.service';
-import { PostsDb } from './posts.db';
+import { CloudinaryService } from '../pictures/cloudinary.service';
+import { PostsDb } from './properties-posts.db';
 import { buildMap, throwRpcException } from '@app/contracts/helper-functions';
-import { PostStatus_Stage1, PostStatus_Stage2, PostStatus_Stage3 } from './schemas/post-status';
+import { PostStatus_Stage1, PostStatus_Stage2, PostStatus_Stage3 } from '../schemas/post-status';
 import { AUTH } from 'libs/contracts/constant';
 import { AUTH_PATTERNS } from '@app/contracts/auth/auth.patterns';
 import { AccountRole } from 'apps/auth/src/schemas/register.schema';
-import { ElasticSearchService } from './elasticsearch.service';
+import { ElasticSearchService } from '../elasticsearch.service';
 
 @Injectable()
 export class PostsService implements OnApplicationBootstrap {
@@ -101,7 +101,7 @@ export class PostsService implements OnApplicationBootstrap {
     let cover_picture
 
     try {
-      const oldPost = await this.findOne({ _id })
+      const oldPost = await this.findOne(_id)
 
       // Only managers are allowed to 
       // update post statuses and modify published posts.
@@ -295,7 +295,6 @@ export class PostsService implements OnApplicationBootstrap {
       return throwRpcException(409, "Số trang vượt quá giới hạn.")
 
     const response = await this.postsDb.find(skip, this.LIMIT)
-    delete response.authorId
 
     return {
       message: 'Lấy danh sách bài đăng thành công.',

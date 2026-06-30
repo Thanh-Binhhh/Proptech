@@ -116,4 +116,23 @@ export class PostsService {
       handleMicroserviceError(error)
     }
   }
+
+  /*==========================
+    NEWS -- FOR CUSTOMERS
+  ============================*/
+  publicFinANews = async (_id) => {
+    try {
+      return await this.postsClient.send(POSTS_PATTERNS.PUBLIC_FIND_ONE, _id);
+    } catch (error) {
+      handleMicroserviceError(error)
+    }
+  }
+
+  publicFindNews = async (page) => {
+    try {
+      return await this.postsClient.send(POSTS_PATTERNS.PUBLIC_FIND, page);
+    } catch (error) {
+      handleMicroserviceError(error)
+    }
+  }
 }

@@ -4,7 +4,7 @@ import { POSTS_PATTERNS } from '@app/contracts/posts/posts.patterns';
 import { CATEGORIES_PATTERNS } from '@app/contracts/posts/categories.patterns';
 import { CreatePostDto } from '@app/contracts/posts/create-post.dto';
 import { CreateCategoryDto } from '@app/contracts/posts/category.dto';
-import { PostsService } from './posts.service';
+import { PostsService } from './properties-posts/properties-posts.service';
 import { CategoriesService } from './categories/categories.service';
 import { UpdateStatusPostDto } from '@app/contracts/posts/update-post-status.dto';
 

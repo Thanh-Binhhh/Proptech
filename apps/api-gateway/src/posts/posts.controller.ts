@@ -126,4 +126,27 @@ export class PostsController {
   ) {
     return await this.postsService.find(page, status, category)
   }
+
+  /*==========================
+    NEWS -- FOR CUSTOMERS
+  ============================*/
+  @Public()
+  @Get('news/public/:_id')
+  async publicFindANews(
+    @Param('_id') _id: string
+  ) {
+    return this.postsService.publicFindANews(_id);
+  }
+
+  @Public()
+  @Get('news/public')
+  async publicFindNews(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+  ) {
+    return await this.postsService.publicFindNews(page)
+  }
+
+  /*==========================
+    NEWS -- FOR INTERNAL COMPANY USE ONLY
+  ============================*/
 }
