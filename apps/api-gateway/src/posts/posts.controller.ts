@@ -187,4 +187,63 @@ export class PostsController {
   ) {
     return await this.postsService.findNews(page, status)
   }
+
+  /*==========================
+    JOB -- FOR CUSTOMERS
+  ============================*/
+  @Public()
+  @Get('jobs/public/:_id')
+  async publicFindJob(
+    @Param('_id') _id: string
+  ) {
+    return this.postsService.publicFindJob(_id);
+  }
+
+  @Public()
+  @Get('jobs/public')
+  async publicFindJobs(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('status') status: string,
+  ) {
+    return await this.postsService.publicFindJobs(page, status)
+  }
+
+  /*==========================
+    JOB -- FOR INTERNAL COMPANY USE ONLY
+  ============================*/
+  @Post('jobs')
+  @UseInterceptors(FileInterceptor('cover_picture'))
+  async createJob(
+    @User() author,
+    @Body() request: CreateNewsDto,
+    @UploadedFile() coverPicture: Express.Multer.File
+  ) {
+    return await this.postsService.createJob(author, request, coverPicture);
+  }
+
+  @Patch('jobs/:_id')
+  @UseInterceptors(FileInterceptor('cover_picture'))
+  async updateJob(
+    @User() actionBy,
+    @Param('_id') _id: string,
+    @Body() request: UpdateNewsDto,
+    @UploadedFile() coverPicture: Express.Multer.File
+  ) {
+    return await this.postsService.updateJob(actionBy, _id, request, coverPicture);
+  }
+
+  @Get('jobs/:_id')
+  async findOneJob(
+    @Param('_id') _id: string
+  ) {
+    return this.postsService.findJob(_id);
+  }
+
+  @Get('jobs')
+  async findJob(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('status') status: string,
+  ) {
+    return await this.postsService.findJobs(page, status)
+  }
 }

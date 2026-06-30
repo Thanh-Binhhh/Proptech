@@ -18,10 +18,13 @@ import { PostStatusHistory, PostStatusHistorySchema } from './properties-posts/s
 import { AUTH } from 'libs/contracts/constant';
 import { ElasticSearchService } from './elasticsearch.service';
 import { News, NewsSchema } from './news-posts/schemas/news.schema';
-import { NewsService } from './news-posts/news-post.service';
+import { NewsService } from './news-posts/news-posts.service';
 import { NewsDb } from './news-posts/news-posts.db';
 import { PostsService } from './posts.service';
 import { PostsDb } from './posts.db';
+import { Jobs, JobsSchema } from './job-posts/schemas/jobs.schema';
+import { JobsService } from './job-posts/job-posts.service';
+import { JobsDb } from './job-posts/job-posts.db';
 
 @Module({
   imports: [
@@ -55,6 +58,13 @@ import { PostsDb } from './posts.db';
       {
         name: News.name,
         schema: NewsSchema,
+      },
+    ]),
+
+    MongooseModule.forFeature([
+      {
+        name: Jobs.name,
+        schema: JobsSchema,
       },
     ]),
 
@@ -108,6 +118,6 @@ import { PostsDb } from './posts.db';
     }),
   ],
   controllers: [PostsController],
-  providers: [PostsService, PropertyPostsService, NewsService, CloudinaryService, CategoriesService, ElasticSearchService, CloudinaryProvider, PostsDb, PropertyPostsDb, CategoriesDb, NewsDb],
+  providers: [PostsService, PropertyPostsService, NewsService, JobsService, CloudinaryService, CategoriesService, ElasticSearchService, CloudinaryProvider, PostsDb, PropertyPostsDb, CategoriesDb, NewsDb, JobsDb],
 })
 export class PostsModule { }

@@ -5,6 +5,7 @@ import { POSTS } from '../../../../libs/contracts/constant';
 import { CATEGORIES_PATTERNS } from '@app/contracts/posts/categories/categories.patterns';
 import { POSTS_PATTERNS } from '@app/contracts/posts/properties/properties.patterns';
 import { NEWS_PATTERNS } from '@app/contracts/posts/news/news.patterns';
+import { JOBS_PATTERNS } from '@app/contracts/posts/jobs/jobs.patterns';
 
 @Injectable()
 export class PostsService {
@@ -167,6 +168,60 @@ export class PostsService {
   findNews = async (page, status) => {
     try {
       return await this.postsClient.send(NEWS_PATTERNS.FIND, { page, status });
+    } catch (error) {
+      handleMicroserviceError(error)
+    }
+  }
+
+  /*==========================
+    JOBS -- FOR CUSTOMERS
+  ============================*/
+  publicFindJob = async (_id) => {
+    try {
+      return await this.postsClient.send(JOBS_PATTERNS.PUBLIC_FIND_ONE, _id);
+    } catch (error) {
+      handleMicroserviceError(error)
+    }
+  }
+
+  publicFindJobs = async (page, status) => {
+    try {
+      return await this.postsClient.send(JOBS_PATTERNS.PUBLIC_FIND, { page, status });
+    } catch (error) {
+      handleMicroserviceError(error)
+    }
+  }
+
+  /*==========================
+    NEWS -- FOR INTERNAL COMPANY USE ONLY
+  ============================*/
+  createJob = async (author, request, coverPicture) => {
+    try {
+      return await this.postsClient.send(JOBS_PATTERNS.CREATE, { author, request, coverPicture });
+    } catch (error) {
+      handleMicroserviceError(error)
+    }
+  }
+
+  updateJob = async (actionBy, _id, request, coverPicture) => {
+    try {
+      return await this.postsClient.send(JOBS_PATTERNS.UPDATE, { actionBy, _id, request, coverPicture });
+    } catch (error) {
+      handleMicroserviceError(error)
+    }
+  }
+
+  findJob = async (_id) => {
+    try {
+      return await this.postsClient.send(JOBS_PATTERNS.FIND_ONE, _id);
+    } catch (error) {
+      handleMicroserviceError(error)
+    }
+  }
+
+  findJobs = async (page, status) => {
+    try {
+      return await this.postsClient.send(JOBS_PATTERNS.FIND, { page, status });
     } catch (error) {
       handleMicroserviceError(error)
     }

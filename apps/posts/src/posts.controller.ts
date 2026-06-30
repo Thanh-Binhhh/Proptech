@@ -8,15 +8,18 @@ import { CreateCategoryDto } from '@app/contracts/posts/categories/category.dto'
 import { PropertyPostsService } from './properties-posts/properties-posts.service';
 import { CategoriesService } from './categories/categories.service';
 import { UpdateStatusPostDto } from '@app/contracts/posts/update-post-status.dto';
-import { NewsService } from './news-posts/news-post.service';
+import { NewsService } from './news-posts/news-posts.service';
 import { CreateNewsDto } from '@app/contracts/posts/news/create-news.dto';
+import { JOBS_PATTERNS } from '@app/contracts/posts/jobs/jobs.patterns';
+import { JobsService } from './job-posts/job-posts.service';
 
 @Controller()
 export class PostsController {
   constructor(
     private readonly categoriesService: CategoriesService,
     private readonly postsService: PropertyPostsService,
-    private readonly newsService: NewsService
+    private readonly newsService: NewsService,
+    private readonly jobsService: JobsService
   ) { }
 
   /*==========================
@@ -192,5 +195,63 @@ export class PostsController {
       status: string,
     }) {
     return await this.newsService.find(payload)
+  }
+
+  /*==========================
+    JOBS -- FOR CUSTOMERS
+  ============================*/
+  @MessagePattern(JOBS_PATTERNS.PUBLIC_FIND_ONE)
+  async publicfindJob(
+    @Payload() request: string) {
+    return await this.jobsService.publicFindOne(request)
+  }
+
+  @MessagePattern(JOBS_PATTERNS.PUBLIC_FIND)
+  async publicFindJobs(
+    @Payload() payload: {
+      page: number,
+      status: string,
+    }) {
+    return await this.jobsService.publicFind(payload)
+  }
+
+  /*==========================
+    JOBS -- FOR INTERNAL COMPANY USE ONLY
+  ============================*/
+  @MessagePattern(JOBS_PATTERNS.CREATE)
+  async createJob(
+    @Payload() payload: {
+      author,
+      request: CreateNewsDto,
+      coverPicture: Express.Multer.File
+    }) {
+    return await this.jobsService.create(payload);
+  }
+
+  @MessagePattern(JOBS_PATTERNS.UPDATE)
+  async updateJob(
+    @Payload() payload: {
+      actionBy,
+      _id: string,
+      request: CreatePostDto,
+      coverPicture: Express.Multer.File
+    }) {
+    return await this.jobsService.update(payload);
+  }
+
+  @MessagePattern(JOBS_PATTERNS.FIND_ONE)
+  async findJob(
+    @Payload() request: string
+  ) {
+    return await this.jobsService.findOne(request)
+  }
+
+  @MessagePattern(JOBS_PATTERNS.FIND)
+  async findJobs(
+    @Payload() payload: {
+      page: number,
+      status: string,
+    }) {
+    return await this.jobsService.find(payload)
   }
 }
