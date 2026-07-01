@@ -23,3 +23,10 @@ services:
     command: npx nest start posts --debug 0.0.0.0:9231 --watch
     ports:
       - '9231:9231'
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate --url http://api-gateway:3000
+    depends_on:
+      - api-gateway
+    restart: unless-stopped

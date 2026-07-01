@@ -72,7 +72,7 @@ export class PropertyPostsService implements OnApplicationBootstrap {
   }
 
   findOneForContactService = async (payload) => {
-    const response = await this.findOne(payload)
+    const response = await this.findOne(payload._id)
 
     return {
       _id: response.data!._id,
