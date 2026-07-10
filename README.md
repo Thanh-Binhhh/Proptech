@@ -91,16 +91,32 @@ AHM-Proptech
 
 #### 3. Posts Service
 
-| HTTP Method | Endpoint                | Mô tả                             |
-| :---------- | :---------------------- | :-------------------------------- |
-| `POST`      | `/posts/categories`     | Tạo một phân loại bài đăng mới.   |
-| `GET`       | `/posts/categories`     | Lấy danh sách phân loại bài đăng. |
-| `PUT`       | `/posts/categories/:id` | Cập nhật phân loại bài đăng.      |
-| `POST`      | `/posts`                | Tạo một bài đăng mới.             |
-| `PATCH`     | `/posts/:id`            | Cập nhật bài đăng.                |
-| `GET`       | `/posts`                | Lấy danh sách các bài đăng.       |
-| `GET`       | `/posts/:id`            | Lấy chi tiết một bài đăng.        |
-| `PATCH`     | `/posts/status/:id`     | Cập nhật trạng thái bài đăng.     |
+| HTTP Method | Endpoint                          | Mô tả                                                |
+| :---------- | :-------------------------------- | :--------------------------------------------------- |
+| `POST`      | `/posts/categories`               | Tạo một phân loại bài đăng mới.                      |
+| `GET`       | `/posts/categories`               | Lấy danh sách phân loại bài đăng.                    |
+| `PUT`       | `/posts/categories/:id`           | Cập nhật phân loại bài đăng.                         |
+| `POST`      | `/posts/properties`               | Tạo một bài đăng bất động sản mới.                   |
+| `PATCH`     | `/posts/properties/:id`           | Cập nhật bài đăng.                                   |
+| `PATCH`     | `/posts/status/:id`               | Cập nhật trạng thái bài đăng.                        |
+| `GET`       | `/posts/properties/search`        | Tìm kiếm bài đăng (yêu cầu đăng nhập).               |
+| `GET`       | `/posts/properties/public/search` | Tìm kiếm bài đăng đã xuất bản.                       |
+| `GET`       | `/posts/properties`               | Lấy danh sách tất cả bài đăng.                       |
+| `GET`       | `/posts/properties/public`        | Lấy danh sách các bài đăng đã xuất bản.              |
+| `GET`       | `/posts/properties/:id`           | Lấy chi tiết một bài đăng (yêu cầu đăng nhập).       |
+| `GET`       | `/posts/properties/public/:id`    | Lấy chi tiết một bài đăng đã xuất bản.               |
+| `POST`      | `/posts/news`                     | Tạo một tin tức mới.                                 |
+| `PATCH`     | `/posts/news/:id`                 | Cập nhật tin tức.                                    |
+| `GET`       | `/posts/news`                     | Lấy danh sách tất cả tin tức.                        |
+| `GET`       | `/posts/news/public`              | Lấy danh sách các tin tức đã xuất bản.               |
+| `GET`       | `/posts/news/:id`                 | Lấy chi tiết một tin tức (yêu cầu đăng nhập).        |
+| `GET`       | `/posts/news/public/:id`          | Lấy chi tiết một tin tức đã xuất bản.                |
+| `POST`      | `/posts/jobs`                     | Tạo một tin tuyển dụng mới.                          |
+| `PATCH`     | `/posts/jobs/:id`                 | Cập nhật tin tuyển dụng.                             |
+| `GET`       | `/posts/jobs`                     | Lấy danh sách tất cả tin tuyển dụng.                 |
+| `GET`       | `/posts/jobs/public`              | Lấy danh sách các tin tuyển dụng đã xuất bản.        |
+| `GET`       | `/posts/jobs/:id`                 | Lấy chi tiết một tin tuyển dụng (yêu cầu đăng nhập). |
+| `GET`       | `/posts/jobs/public/:id`          | Lấy chi tiết một tin tuyển dụng đã xuất bản.         |
 
 ---
 
